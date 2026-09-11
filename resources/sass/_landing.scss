@@ -1,0 +1,1471 @@
+// =============================================================================
+// Landing page — dkm.erdigma.id
+// =============================================================================
+//
+// The public page. It shares the palette and type scale with the rest of the
+// app but not the shell: a visitor has no sidebar, so the layout is a plain
+// vertical document.
+//
+// Kept in its own file rather than appended to _components.scss because none of
+// it is reused anywhere else, and everything is scoped under `.landing` so these
+// rules cannot leak into the signed-in views.
+// =============================================================================
+
+.landing {
+    background: $white;
+    scroll-behavior: smooth;
+
+    /*
+     * Height of the sticky navbar, published as a variable because two other
+     * things have to sit clear of it: anchor targets, and the sticky table
+     * header on the monthly schedule. Hard-coding the number in three places is
+     * how they drift apart.
+     *
+     * 40px logo + 2 × 16px vertical padding = 72px, and one row at every width
+     * now that the small-screen links live behind the hamburger. This is only
+     * the value for the first paint — immersive.js measures the bar and
+     * republishes it, so nothing here has to stay true.
+     */
+    --landing-nav-h: 72px;
+
+    // Anchor links would otherwise land underneath the navbar.
+    [id] {
+        scroll-margin-top: calc(var(--landing-nav-h) + 1rem);
+    }
+}
+
+// ------------------------------------------------------------------- Navbar
+
+/*
+ * Position, ground and the glass pill are in `_immersive.scss`, because they
+ * only make sense together with the dark hero every public page now opens with.
+ * What is left here is the part that does not change: where it sits in the
+ * stack.
+ */
+.landing-nav {
+    z-index: $zindex-sticky;
+}
+
+.landing-mark {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    font-size: 1.35rem;
+    background: rgba($white, 0.14);
+    border-radius: $border-radius;
+}
+
+.landing-nav-title {
+    color: $white;
+    font-size: 1rem;
+}
+
+.landing-nav-sub {
+    color: rgba($white, 0.6);
+    font-size: 0.72rem;
+}
+
+.landing-nav-link {
+    color: rgba($white, 0.78);
+    text-decoration: none;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    // A label that wraps mid-word is worse than a row that runs out of space:
+    // the row can be given a breakpoint, "Al- / Ma'tsurat" just looks broken.
+    white-space: nowrap;
+    padding: 0.5rem 0.85rem;
+    border-radius: $border-radius;
+    transition: color $transition-base, background-color $transition-base;
+
+    &:hover {
+        color: $white;
+        background: rgba($white, 0.1);
+    }
+
+    // The current page. Marked with a colour change and an underline rather
+    // than colour alone, so it still reads for anyone who cannot separate the
+    // two greens.
+    &.is-active {
+        color: $white;
+        background: rgba($white, 0.14);
+        box-shadow: inset 0 -2px 0 $brand-300;
+    }
+}
+
+/*
+ * The desktop links, as one group.
+ *
+ * They used to be loose siblings of the sign-in button, each carrying its own
+ * `d-none d-md-inline`. Grouping them is what lets the front page gather them
+ * into a floating pill (see `_immersive.scss`) without touching the markup
+ * again; everywhere else this is still a plain row.
+ */
+.landing-nav-links {
+    display: none;
+    align-items: center;
+    gap: 0.25rem;
+
+    /*
+     * From xl, not lg.
+     *
+     * The six labels come to roughly 650px of pill. At lg the container is
+     * 960px and the pill is centred between the logo and the sign-in button,
+     * which leaves it about 630 — so on an iPad in landscape the labels broke
+     * in half ("Al- / Ma'tsurat") rather than the row admitting it was short of
+     * room. Below xl the hamburger takes over, which it is there for.
+     */
+    @include media-breakpoint-up(xl) {
+        display: flex;
+    }
+}
+
+/*
+ * The menu behind the hamburger.
+ *
+ * Bootstrap's offcanvas supplies the backdrop, the Escape key and the focus
+ * trap; what is here is only how it looks — the same night ground as the hero,
+ * so opening the menu does not feel like leaving the site.
+ */
+// `.offcanvas-end` sets a 400px width at the same specificity as this rule, so
+// it is matched on both classes rather than left to depend on import order.
+.offcanvas.landing-menu {
+    width: min(20rem, 86vw);
+    color: $white;
+    border: 0;
+
+    @include girih-ground(
+        ffffff, 0.05,
+        linear-gradient(200deg, $brand-800 0%, $brand-950 70%, #021c19 100%)
+    );
+
+    /*
+     * Bootstrap does not space this header out.
+     *
+     * It has `display: flex` but no `justify-content`, and relies on
+     * `.btn-close` carrying `margin-left: auto` to push the close button to the
+     * far end. This close button is not a `.btn-close` — it is the round glass
+     * one the rest of the site uses — so the header has to say it itself, or
+     * the X ends up glued to the word "Menu".
+     */
+    .offcanvas-header {
+        justify-content: space-between;
+        padding: 1.15rem 1.25rem 0.75rem;
+    }
+}
+
+.landing-menu-title {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $brand-200;
+}
+
+.landing-menu-close {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    color: $white;
+    background: rgba($white, 0.12);
+    border: 1px solid rgba($white, 0.2);
+    border-radius: 50%;
+    transition: background-color $transition-base;
+
+    &:hover {
+        background: rgba($white, 0.22);
+    }
+}
+
+.landing-menu-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.5rem 0.85rem 1.25rem;
+}
+
+.landing-menu-link {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: rgba($white, 0.82);
+    text-decoration: none;
+    border-radius: $border-radius-lg;
+    transition: color $transition-base, background-color $transition-base;
+
+    > span {
+        flex: 1 1 auto;
+    }
+
+    // Bootstrap Icons here are wayfinding, not decoration: at a glance the
+    // shape is what tells the six rows apart, before any of them is read.
+    > i:first-child {
+        font-size: 1.05rem;
+        color: $brand-300;
+        transition: color $transition-base;
+    }
+
+    &:hover {
+        color: $white;
+        background: rgba($white, 0.08);
+    }
+
+    &.is-active {
+        color: $brand-950;
+        background: $white;
+
+        > i {
+            color: $brand-700;
+        }
+    }
+}
+
+.landing-menu-chevron {
+    font-size: 0.75rem;
+    opacity: 0.45;
+}
+
+// Set apart from the six links above it: those go somewhere on this site, this
+// one signs you in.
+.landing-menu-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $white;
+    text-decoration: none;
+    background: $brand-600;
+    border-radius: $border-radius-pill;
+    transition: background-color $transition-base;
+
+    &:hover {
+        color: $white;
+        background: $brand-500;
+    }
+}
+
+.landing-menu-foot {
+    margin: 1.25rem 0 0;
+    padding-top: 1rem;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: rgba($white, 0.6);
+    border-top: 1px solid rgba($white, 0.12);
+}
+
+// ------------------------------------------------------- Hero content
+
+// The shell itself is `<x-portal-hero>`; see `_immersive.scss`. What follows is
+// the copy that sits inside it, which every page still writes for itself.
+
+/*
+ * The label above a page title.
+ *
+ * Small caps on a glass pill, matching the navigation it sits under — one
+ * eyebrow for every public page rather than a second one for the front page
+ * that would then have to be kept in step.
+ */
+.landing-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.32rem 0.9rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $brand-100;
+    background: rgba($white, 0.12);
+    border: 1px solid rgba($white, 0.18);
+    border-radius: $border-radius-pill;
+    backdrop-filter: blur(8px);
+}
+
+.landing-address {
+    color: $brand-200;
+    font-size: $font-size-sm;
+    margin-bottom: 1.25rem;
+}
+
+.landing-lead {
+    color: rgba($white, 0.82);
+    font-size: 1.03rem;
+    line-height: 1.75;
+    max-width: 34rem;
+    margin-bottom: 0;
+}
+
+// -------------------------------------------------------------- Next prayer
+
+.landing-next {
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    background: rgba($white, 0.1);
+    border: 1px solid rgba($white, 0.18);
+    border-radius: $border-radius-xl;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 24px 48px -24px rgba($brand-950, 0.8);
+}
+
+.landing-next-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $brand-200;
+}
+
+.landing-clock {
+    font-variant-numeric: tabular-nums;
+    font-size: $font-size-sm;
+    color: rgba($white, 0.75);
+}
+
+.landing-next-name {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1.1rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: $white;
+}
+
+.landing-next-time {
+    font-size: clamp(3rem, 9vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: $white;
+}
+
+.landing-next-countdown {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba($white, 0.16);
+    color: $brand-100;
+
+    strong {
+        font-size: 1.4rem;
+        font-variant-numeric: tabular-nums;
+        color: $white;
+    }
+}
+
+.landing-next-foot {
+    margin-top: 0.85rem;
+    font-size: 0.8rem;
+    color: rgba($white, 0.6);
+}
+
+// ----------------------------------------------------------------- Sections
+
+.landing-section {
+    padding: clamp(2.25rem, 4.5vw, 3.5rem) 0;
+}
+
+/*
+ * The band that separates two sections.
+ *
+ * Carries the hero's pattern at a strength you have to look for — enough that
+ * the page reads as one surface rather than a dark hero with unrelated white
+ * below it, not enough to compete with the cards sitting on it.
+ */
+.landing-section-muted {
+    // 134e48 is $brand-900; the mixin needs the hex without its hash.
+    @include girih-ground(134e48, 0.035, $neutral-50);
+
+    border-block: 1px solid $neutral-200;
+}
+
+// Weight and tracking follow the hero title rather than Bootstrap's default,
+// so a section heading reads as the same voice one scroll further down.
+.landing-heading {
+    font-size: clamp(1.6rem, 3.6vw, 2.15rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    color: $neutral-900;
+}
+
+.landing-sub {
+    color: $neutral-500;
+    margin-bottom: 0;
+}
+
+// ------------------------------------------------------------- Prayer times
+
+.landing-prayer {
+    position: relative;
+    height: 100%;
+    padding: 1rem 0.6rem;
+    text-align: center;
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+    transition: transform $transition-base, box-shadow $transition-base;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: $box-shadow;
+    }
+
+    // The next prayer is what most visitors came for, so it is lifted out of
+    // the row rather than merely tinted.
+    &.is-next {
+        background: linear-gradient(165deg, $brand-700, $brand-800);
+        border-color: $brand-700;
+        box-shadow: 0 16px 32px -18px rgba($brand-900, 0.7);
+
+        .landing-prayer-name {
+            color: rgba($white, 0.82);
+        }
+
+        .landing-prayer-time {
+            color: $white;
+        }
+
+        .landing-prayer-icon {
+            color: $brand-200 !important;
+        }
+    }
+}
+
+.landing-prayer-flag {
+    position: absolute;
+    top: -0.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.15rem 0.6rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $brand-900;
+    background: $brand-300;
+    border-radius: $border-radius-pill;
+    white-space: nowrap;
+}
+
+.landing-prayer-icon {
+    font-size: 1.25rem;
+}
+
+.landing-prayer-name {
+    margin-top: 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: $neutral-500;
+}
+
+.landing-prayer-time {
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: $neutral-900;
+}
+
+// ---------------------------------------------------------- Friday schedule
+
+.landing-friday {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.15rem 1.35rem;
+    margin-bottom: 0.85rem;
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+    transition: transform $transition-base, box-shadow $transition-base;
+
+    &:hover {
+        transform: translateX(3px);
+        box-shadow: $box-shadow-sm;
+    }
+
+    &.is-featured {
+        border-color: $brand-300;
+        box-shadow: 0 12px 28px -20px rgba($brand-900, 0.55);
+    }
+
+    @include media-breakpoint-down(md) {
+        flex-wrap: wrap;
+        gap: 0.85rem;
+    }
+}
+
+.landing-friday-date {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 60px;
+    padding: 0.5rem 0;
+    background: $brand-50;
+    border-radius: $border-radius;
+    line-height: 1.1;
+}
+
+.landing-friday-day {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: $brand-800;
+}
+
+.landing-friday-month {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $brand-700;
+}
+
+.landing-friday-theme {
+    font-weight: 600;
+    color: $neutral-900;
+}
+
+.landing-friday-people {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.1rem;
+    margin-top: 0.3rem;
+    font-size: $font-size-sm;
+    color: $neutral-500;
+}
+
+.landing-friday-time {
+    flex: 0 0 auto;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: $neutral-600;
+}
+
+.landing-empty {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: $neutral-400;
+    background: $white;
+    border: 1px dashed $neutral-300;
+    border-radius: $border-radius-lg;
+
+    i {
+        display: block;
+        font-size: 2rem;
+        margin-bottom: 0.6rem;
+    }
+}
+
+// ----------------------------------------------------------- Kajian sessions
+
+.landing-session {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.1rem;
+    padding: 1.1rem 1.3rem;
+    margin-bottom: 0.7rem;
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+    transition: transform $transition-base, box-shadow $transition-base, border-color $transition-base;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    // A short connector to the day rail, so each card is visibly attached to
+    // the date above rather than merely sitting near it.
+    &::before {
+        content: '';
+        position: absolute;
+        top: 1.9rem;
+        left: -1.65rem;
+        width: 1.65rem;
+        height: 2px;
+        background: $brand-100;
+    }
+
+    &:hover {
+        transform: translateX(3px);
+        border-color: $brand-200;
+        box-shadow: $box-shadow-sm;
+    }
+
+    @include media-breakpoint-down(sm) {
+        gap: 0.85rem;
+        padding: 0.95rem 1rem;
+
+        &::before {
+            display: none;
+        }
+
+        &:hover {
+            transform: none;
+        }
+    }
+}
+
+.landing-session-time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+    width: 68px;
+    padding: 0.5rem 0.25rem;
+    background: $brand-50;
+    border-radius: $border-radius;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
+}
+
+.landing-session-hour {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: $brand-800;
+}
+
+.landing-session-end {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: $brand-700;
+    white-space: nowrap;
+}
+
+.landing-session-title {
+    font-weight: 600;
+    color: $neutral-900;
+}
+
+.landing-session-topic {
+    font-size: $font-size-sm;
+    color: $neutral-500;
+    margin-top: 0.15rem;
+}
+
+.landing-session-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1rem;
+    margin-top: 0.4rem;
+    font-size: 0.82rem;
+    color: $neutral-500;
+}
+
+// Sessions are grouped by day, so a busy week reads as one week rather than as
+// a stack of unrelated cards.
+.landing-day-group + .landing-day-group {
+    margin-top: 2rem;
+}
+
+.landing-day-head {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 0.85rem;
+}
+
+.landing-day-badge {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 52px;
+    padding: 0.4rem 0;
+    background: linear-gradient(165deg, $brand-700, $brand-800);
+    border-radius: $border-radius;
+    line-height: 1.15;
+    color: $white;
+}
+
+.landing-day-num {
+    font-size: 1.2rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+// Three letters, sized to fit inside the tile. Spelling the month out here
+// overflowed the badge — see DateHelper::shortMonthName().
+.landing-day-mon {
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $brand-200;
+}
+
+.landing-day-name {
+    font-weight: 700;
+    line-height: 1.25;
+    color: $neutral-900;
+}
+
+.landing-day-full {
+    font-size: $font-size-sm;
+    color: $neutral-500;
+}
+
+// Pushed to the far end of the header, and dropped on a phone where the day
+// name already needs the width.
+.landing-day-count {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: $brand-800;
+    background: $brand-50;
+    border-radius: $border-radius-pill;
+    white-space: nowrap;
+
+    @include media-breakpoint-down(sm) {
+        display: none;
+    }
+}
+
+/*
+ * The sessions of one day, hung off a rail that lines up with the middle of the
+ * date badge above them. Without it the cards float free and it is not obvious
+ * which day they belong to.
+ */
+.landing-day-body {
+    position: relative;
+    padding-left: 1.65rem;
+    margin-left: 1.6rem;
+    border-left: 2px solid $brand-100;
+
+    @include media-breakpoint-down(sm) {
+        padding-left: 0;
+        margin-left: 0;
+        border-left: 0;
+    }
+}
+
+// ------------------------------------------------------------------ Features
+
+.landing-feature {
+    padding: 1.75rem;
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+    transition: transform $transition-base, box-shadow $transition-base, border-color $transition-base;
+
+    &:hover {
+        transform: translateY(-4px);
+        border-color: $brand-200;
+        box-shadow: $box-shadow;
+    }
+}
+
+/*
+ * One tone, not six.
+ *
+ * These used to be six different Bootstrap subtle-backgrounds. Against a hero
+ * built from exactly two colours, six pastel chips were the loudest thing on
+ * the page — and they were carrying no information, since the icon shape
+ * already tells the cards apart.
+ */
+.landing-feature-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    font-size: 1.3rem;
+    color: $brand-700;
+    background: $brand-50;
+    border: 1px solid $brand-100;
+    border-radius: $border-radius;
+    margin-bottom: 1.1rem;
+    transition: color $transition-base, background-color $transition-base;
+}
+
+.landing-feature:hover .landing-feature-icon {
+    color: $white;
+    background: $brand-700;
+    border-color: $brand-700;
+}
+
+.landing-feature-title {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: $neutral-900;
+    margin-bottom: 0.5rem;
+}
+
+.landing-feature-body {
+    font-size: $font-size-sm;
+    line-height: 1.7;
+    color: $neutral-500;
+}
+
+// ----------------------------------------------------------------------- CTA
+
+/*
+ * The closing band.
+ *
+ * It used to carry the gradient the old hero had. That hero is gone, which left
+ * this the only surface on the site with a look of its own — so it takes the
+ * hero's ground instead, and the page opens and closes on the same note.
+ */
+.landing-cta {
+    position: relative;
+    padding: clamp(3rem, 6vw, 4.5rem) 0;
+    color: $white;
+
+    @include girih-ground(
+        ffffff, 0.05,
+        radial-gradient(120% 140% at 50% 0%, $brand-800 0%, $brand-900 60%, $brand-950 100%)
+    );
+}
+
+.landing-cta-title {
+    font-size: clamp(1.5rem, 3.4vw, 2rem);
+    font-weight: 700;
+}
+
+.landing-cta-sub {
+    color: rgba($white, 0.8);
+    max-width: 32rem;
+    margin: 0.6rem auto 0;
+}
+
+// ---------------------------------------------------------- Monthly table
+
+
+/*
+ * A month is thirty rows; by the tenth the reader has lost which column is
+ * which. The header therefore sticks — but sticking is only possible against a
+ * scroll container, so the wrapper's overflow has to be handled carefully.
+ *
+ * Below md the table is wider than the screen and the box scrolls sideways
+ * (which also makes it the sticky context, so the header cannot follow the
+ * page). There, the *date* column sticks to the left instead — sideways is the
+ * direction you actually get lost in on a phone.
+ *
+ * From md up the table fits, the overflow is dropped, and the header sticks to
+ * the page underneath the navbar.
+ */
+.landing-table-wrap {
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+
+    @include media-breakpoint-down(md) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+.landing-table {
+    min-width: 40rem;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+
+    thead th {
+        /*
+         * Sticks to the page — but only from md up, where the table fits and
+         * the wrapper has no overflow of its own.
+         *
+         * Below md the wrapper scrolls sideways, and a box that scrolls on one
+         * axis becomes a scroll container on both. Sticky then measures against
+         * *that* box rather than the page: with nothing scrolled vertically
+         * inside it, the offset simply pushed the header down from the top of
+         * the table and parked it across the third row. The comment on
+         * `.landing-table-wrap` said as much; the rule did not honour it.
+         *
+         * The date column stays stuck there instead, which is the direction you
+         * actually get lost in on a phone.
+         */
+        position: static;
+
+        @include media-breakpoint-up(md) {
+            position: sticky;
+            // Clears the floating navigation and the scrim that fades the page
+            // out behind it — the gap the Al-Ma'tsurat toolbar keeps too.
+            top: calc(var(--landing-nav-h) + 0.4rem);
+        }
+
+        z-index: 3;
+        background: $neutral-50;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: $neutral-500;
+        padding: 0.6rem 0.5rem;
+        white-space: nowrap;
+
+        // A border on a sticky cell tends to be painted over by the row
+        // scrolling beneath it; a shadow sits outside the box and survives.
+        box-shadow: inset 0 -1px 0 $neutral-200;
+    }
+
+    tbody td,
+    tbody th {
+        padding: 0.45rem 0.5rem;
+        border-bottom: 1px solid $neutral-100;
+        vertical-align: middle;
+        background: $white;
+    }
+
+    tbody tr:last-child td,
+    tbody tr:last-child th {
+        border-bottom: 0;
+    }
+
+    // Tracks the eye across a wide row.
+    tbody tr:hover td,
+    tbody tr:hover th {
+        background: $neutral-50;
+    }
+
+    tbody tr.is-today {
+        td,
+        th {
+            background: $brand-50;
+            font-weight: 700;
+            color: $brand-900;
+        }
+    }
+}
+
+.landing-table-date {
+    white-space: nowrap;
+    text-align: left;
+    padding-left: 1rem !important;
+    font-weight: 500;
+
+    // Sideways orientation on a phone. Opaque, or the times scroll under it.
+    @include media-breakpoint-down(md) {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        box-shadow: 1px 0 0 $neutral-200;
+    }
+}
+
+// The header cell of the date column is sticky in both directions at once, so
+// it has to outrank both.
+.landing-table thead .landing-table-date {
+    z-index: 4;
+}
+
+.landing-table-day {
+    font-weight: 700;
+    color: $neutral-900;
+}
+
+.landing-table-weekday {
+    margin-left: 0.35rem;
+    font-size: $font-size-sm;
+    font-weight: 400;
+    color: $neutral-500;
+}
+
+// -------------------------------------------------------------------- Footer
+
+.landing-footer {
+    padding: 2.5rem 0;
+    background: $brand-950;
+    color: rgba($white, 0.85);
+}
+
+.landing-footer-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $brand-200;
+    margin-bottom: 0.75rem;
+}
+
+.landing-footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: $font-size-sm;
+
+    li + li {
+        margin-top: 0.4rem;
+    }
+
+    a {
+        color: rgba($white, 0.75);
+        text-decoration: none;
+        transition: color $transition-base;
+
+        &:hover {
+            color: $white;
+        }
+    }
+}
+
+// =============================================================================
+// Detail pages
+// =============================================================================
+
+// Cards on the listings are now links. They keep their card appearance rather
+// than picking up link colour and underline.
+.landing-friday,
+.landing-session {
+    text-decoration: none;
+    color: inherit;
+}
+
+// Points forward without shouting. Slides on hover so the whole card reads as
+// one target rather than a row with a button in it.
+.landing-chevron {
+    color: $neutral-400;
+    font-size: 0.8rem;
+    transition: transform $transition-base, color $transition-base;
+}
+
+.landing-friday:hover .landing-chevron,
+.landing-session:hover .landing-chevron {
+    transform: translateX(3px);
+    color: $brand-700;
+}
+
+/*
+ * Back to the listing.
+ *
+ * A detail page is usually arrived at from a pasted link, so there is no history
+ * to go back through — the trail has to be on the page itself.
+ */
+.landing-back {
+    display: inline-flex;
+    align-items: center;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $brand-200;
+    text-decoration: none;
+    padding: 0.3rem 0.7rem 0.3rem 0.55rem;
+    margin-left: -0.55rem;
+    border-radius: $border-radius;
+    transition: color $transition-base, background-color $transition-base;
+
+    &:hover {
+        color: $white;
+        background: rgba($white, 0.1);
+    }
+}
+
+.landing-detail,
+.landing-aside {
+    padding: clamp(1.25rem, 3vw, 2rem);
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+}
+
+.landing-aside {
+    background: $neutral-50;
+}
+
+/*
+ * Label/value pairs.
+ *
+ * A two-column grid rather than a table: it collapses to one column on a phone
+ * without the horizontal scrolling a table would need.
+ */
+.landing-facts {
+    display: grid;
+    grid-template-columns: minmax(7rem, 10rem) 1fr;
+    gap: 0.85rem 1.25rem;
+    margin: 0;
+
+    dt {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        font-weight: 500;
+        color: $neutral-500;
+
+        i {
+            color: $brand-600;
+            font-size: 0.9rem;
+        }
+    }
+
+    dd {
+        margin: 0;
+        font-weight: 600;
+        color: $neutral-900;
+    }
+
+    @include media-breakpoint-down(sm) {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+
+        dd {
+            margin-bottom: 0.85rem;
+        }
+    }
+}
+
+.landing-prose {
+    padding-top: 1.25rem;
+    border-top: 1px solid $neutral-200;
+    color: $neutral-600;
+    line-height: 1.75;
+}
+
+.landing-note {
+    padding: 0.85rem 1rem;
+    font-size: $font-size-sm;
+    color: $brand-900;
+    background: $brand-50;
+    border: 1px solid $brand-100;
+    border-radius: $border-radius;
+}
+
+.landing-aside-item {
+    display: block;
+    padding: 0.75rem 0.9rem;
+    margin-bottom: 0.5rem;
+    text-decoration: none;
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius;
+    transition: transform $transition-base, border-color $transition-base;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    &:hover {
+        transform: translateX(3px);
+        border-color: $brand-300;
+    }
+}
+
+.landing-aside-date {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $brand-700;
+}
+
+.landing-aside-title {
+    display: block;
+    margin-top: 0.15rem;
+    font-weight: 600;
+    color: $neutral-900;
+}
+
+.landing-aside-meta {
+    display: block;
+    font-size: $font-size-sm;
+    color: $neutral-500;
+}
+
+// ------------------------------------------------------------------ People
+
+/*
+ * The roster on a session page.
+ *
+ * A grid rather than a list: twelve names in one column is a long scroll for
+ * something people scan rather than read.
+ */
+.landing-people {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 0.6rem;
+}
+
+.landing-person {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    background: $neutral-50;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius;
+
+    // The mentor leads the group, so they lead the list too.
+    &.is-mentor {
+        background: $brand-50;
+        border-color: $brand-200;
+        grid-column: 1 / -1;
+
+        .landing-person-avatar {
+            background: $brand-700;
+        }
+    }
+}
+
+.landing-person-avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $white;
+    background: $neutral-400;
+    border-radius: 50%;
+}
+
+.landing-person-name {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $neutral-900;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.landing-person-role {
+    display: block;
+    font-size: 0.72rem;
+    color: $neutral-500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ------------------------------------------------------------ City picker
+
+// ---------------------------------------------------------------- Toolbar
+
+/*
+ * One bar holding both decisions: which region, and which month.
+ *
+ * They answer the same question — "which schedule am I looking at" — so
+ * splitting them across two stacked blocks made the page read as a form
+ * standing in front of the table rather than a heading above it.
+ *
+ * The select is styled to look like part of the bar rather than a form control
+ * dropped into it: no border of its own, no second background.
+ */
+.landing-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.45rem 0.6rem 0.45rem 1rem;
+    margin-bottom: 1rem;
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+}
+
+.landing-toolbar-city {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1 1 14rem;
+    min-width: 0;
+
+    > i {
+        flex: 0 0 auto;
+        color: $brand-600;
+    }
+
+    // Tom Select replaces the select, so the wrapper is what has to stretch.
+    .ts-wrapper {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .ts-control {
+        padding: 0.25rem 0 !important;
+        font-weight: 600;
+        color: $neutral-900;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .ts-wrapper.focus .ts-control {
+        box-shadow: none !important;
+    }
+
+    // The caret duplicates what the field already implies.
+    .ts-wrapper.single .ts-control::after {
+        display: none !important;
+    }
+}
+
+.landing-toolbar-month {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 0 0 auto;
+}
+
+/*
+ * Swapping the month, or the region.
+ *
+ * Two states, and they do different jobs. While the request is in flight the
+ * old table stays where it is, dimmed and slightly desaturated — a fetch to
+ * another kabupaten is a real network round trip, and an empty box would read
+ * as something having gone wrong. When the reply lands, the new table is a new
+ * element (see the `wire:key`), so it plays its entrance rather than having its
+ * numbers quietly rewritten under the reader.
+ */
+.landing-table-swap {
+    transition: opacity 180ms $ease-out, filter 180ms $ease-out;
+
+    &.is-fetching {
+        opacity: 0.45;
+        filter: saturate(0.6);
+        pointer-events: none;
+    }
+
+    > * {
+        animation: dkm-fade-up 420ms $ease-out both;
+    }
+}
+
+/*
+ * The first rows arrive a beat after the block, which reads as the table
+ * filling in rather than appearing whole.
+ *
+ * Capped at eight: a thirty-row stagger would still be running long after the
+ * reader has started looking, and the rows below the fold are not the ones
+ * being watched.
+ */
+@media (prefers-reduced-motion: no-preference) {
+    .landing-table-swap tbody tr {
+        animation: dkm-fade-up 380ms $ease-out both;
+    }
+
+    @for $i from 1 through 8 {
+        .landing-table-swap tbody tr:nth-child(#{$i}) {
+            animation-delay: #{60 + $i * 26}ms;
+        }
+    }
+
+    .landing-table-swap tbody tr:nth-child(n + 9) {
+        animation-delay: 270ms;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .landing-table-swap > *,
+    .landing-table-swap tbody tr {
+        animation: none;
+    }
+}
+
+/*
+ * On a phone the two controls stack anyway, so let them stack properly.
+ *
+ * Left to `space-between`, the region took the first line and the month stepper
+ * dropped underneath it as a small huddle against the left edge — it read as a
+ * layout that had come apart rather than two deliberate rows. Each takes a full
+ * row now, separated by a rule, with the stepper spread edge to edge so its two
+ * arrows land where a thumb reaches.
+ */
+@include media-breakpoint-down(md) {
+    .landing-toolbar {
+        padding: 0.2rem 0.85rem 0.45rem;
+    }
+
+    .landing-toolbar-city {
+        flex: 1 1 100%;
+        padding-block: 0.5rem;
+    }
+
+    .landing-toolbar-month {
+        flex: 1 1 100%;
+        justify-content: space-between;
+        padding-top: 0.5rem;
+        border-top: 1px solid $neutral-200;
+    }
+
+    // With the row spread, a fixed minimum only pushes the arrows outward.
+    .landing-toolbar-title {
+        min-width: 0;
+    }
+}
+
+.landing-toolbar-title {
+    min-width: 9.5rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: $font-size-sm;
+    color: $neutral-700;
+}
+
+/*
+ * The month arrows.
+ *
+ * These are `<button>` elements now that stepping is a Livewire call rather
+ * than a link, and a bare button with no ground of its own falls back to the
+ * browser's default chrome — the grey bevelled rectangle that belongs to no
+ * design at all. Both are stated here, and the shape follows the pills the rest
+ * of the site is built from.
+ */
+.landing-toolbar-step {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    color: $neutral-500;
+    text-decoration: none;
+    background: $neutral-100;
+    border: 0;
+    border-radius: 50%;
+    transition: color $transition-base, background-color $transition-base;
+
+    &:hover {
+        color: $white;
+        background: $brand-700;
+    }
+
+    // At either end of the browsable window. Still visible, so the row keeps
+    // its shape — just plainly out of reach.
+    &.is-off,
+    &:disabled {
+        color: $neutral-300;
+        background: $neutral-50;
+        pointer-events: none;
+    }
+}
+
+// =============================================================================
+// Keeping the page below the hero in the same voice
+// =============================================================================
+
+/*
+ * Pills, everywhere on the public site.
+ *
+ * The hero's buttons are pills and the navigation is pills; a rounded rectangle
+ * two scrolls down is the same page speaking with a different accent. Scoped to
+ * `.landing` so the panel keeps Bootstrap's shape.
+ */
+.landing .btn {
+    border-radius: $border-radius-pill;
+}
+
+/*
+ * And in the same motion.
+ *
+ * `[data-aos]` is shared with the panel, where the shorter, flatter curve is
+ * right for a dense table view. Here the entrance should match the hero's, so
+ * the easing is restated for this side of the app only.
+ */
+@media (prefers-reduced-motion: no-preference) {
+    .landing [data-aos] {
+        animation-duration: 720ms;
+        animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+}

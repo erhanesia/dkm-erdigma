@@ -1,0 +1,162 @@
+// =============================================================================
+// DKM Erdigma — main stylesheet
+// =============================================================================
+// Order matters: tokens override Bootstrap's defaults, Bootstrap builds the
+// foundation, then our components layer on top.
+// =============================================================================
+
+@import 'variables';
+
+@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+@import 'components';
+// Before 'landing': that file uses the girih mixin defined here.
+@import 'immersive';
+@import 'landing';
+@import 'quran';
+@import 'matsurat';
+
+// -----------------------------------------------------------------------------
+// Base
+// -----------------------------------------------------------------------------
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+a {
+    text-decoration: none;
+    transition: color $transition-fast;
+}
+
+// Keyboard focus must stay obvious; mouse focus should not add noise.
+:focus-visible {
+    outline: 2px solid $brand-400;
+    outline-offset: 2px;
+}
+
+::selection {
+    background: $brand-100;
+    color: $brand-900;
+}
+
+// Scrollbars, quietly restyled to match the neutral palette.
+* {
+    scrollbar-width: thin;
+    scrollbar-color: $neutral-300 transparent;
+}
+
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+    background: $neutral-300;
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+
+    &:hover { background-color: $neutral-400; background-clip: content-box; }
+}
+
+// -----------------------------------------------------------------------------
+// Third-party alignment
+// -----------------------------------------------------------------------------
+
+.ts-control {
+    border-color: $input-border-color !important;
+    border-radius: $border-radius !important;
+    padding: 0.4rem 0.75rem !important;
+    font-size: $font-size-base;
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: $input-focus-border-color !important;
+    box-shadow: 0 0 0 $input-btn-focus-width rgba($primary, $input-btn-focus-color-opacity) !important;
+}
+
+/*
+ * Tom Select's own stylesheet is imported from app.js, so Vite emits it as a
+ * separate file whose order relative to this one is not guaranteed. Anything
+ * the dropdown needs to be legible is therefore stated here rather than
+ * inherited — a transparent panel floating over the page is what happens when
+ * it is not.
+ */
+.ts-dropdown {
+    background: $white !important;
+    border: 1px solid $neutral-200 !important;
+    border-radius: $border-radius !important;
+    box-shadow: $box-shadow-lg !important;
+    // Above sticky headers and the page content it floats over.
+    z-index: $zindex-popover !important;
+    overflow: hidden;
+
+    .option {
+        padding: 0.5rem 0.85rem !important;
+        font-size: $font-size-sm;
+        color: $neutral-700;
+    }
+
+    .option.active,
+    .option:hover {
+        color: $white !important;
+        background: $primary !important;
+    }
+
+    .no-results {
+        padding: 0.6rem 0.85rem !important;
+    }
+}
+
+// The list itself scrolls; capping it stops a 518-item dropdown covering the
+// whole viewport.
+.ts-dropdown-content {
+    max-height: 16rem !important;
+}
+
+.flatpickr-input {
+    background-color: #fff !important;
+}
+
+.swal2-popup {
+    border-radius: $border-radius-xl !important;
+    font-family: $font-family-sans-serif !important;
+}
+
+.swal2-title {
+    font-size: $h3-font-size !important;
+    font-weight: 700 !important;
+}
+
+.swal2-html-container {
+    font-size: $font-size-base !important;
+    color: $neutral-600 !important;
+}
+
+// -----------------------------------------------------------------------------
+// Print — the Friday roster and prayer schedule get pinned to noticeboards
+// -----------------------------------------------------------------------------
+
+@media print {
+    .app-sidebar,
+    .app-topbar,
+    .no-print {
+        display: none !important;
+    }
+
+    .app-main { margin-left: 0 !important; }
+    .app-content { padding: 0 !important; }
+
+    .card,
+    .table-card {
+        box-shadow: none !important;
+        border: 1px solid $neutral-300 !important;
+    }
+
+    body { background: #fff !important; }
+}

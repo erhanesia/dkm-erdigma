@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+
+# =============================================================================
+# env-switch — pindah antara environment XAMPP dan Docker/Sail
+# =============================================================================
+#
+# Alasan skrip ini ada: alamat database berbeda tergantung dari mana perintah
+# dijalankan.
+#
+#   - Di dalam container, MySQL dipanggil dengan nama service: `mysql`
+#   - Dari Windows/Git Bash, nama itu tidak ada di DNS mana pun
+#
+# Salah satu dari keduanya pasti salah, tergantung cara Anda menjalankan.
+# Skrip ini mengubah baris yang perlu diubah saja, sisanya tidak disentuh.
+#
+# Pakai:
+#   ./env-switch xampp     jalankan dengan `php artisan serve`
+#   ./env-switch sail      jalankan dengan `./dkm up`
+#   ./env-switch status    lihat sedang pakai yang mana
+# =============================================================================
+
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
+ENV_FILE=".env"
+
+if [ ! -f "${ENV_FILE}" ]; then
+    echo "Berkas .env tidak ditemukan." >&2
+    exit 1
+fi
+
+# Mengganti nilai satu variabel di .env tanpa mengubah baris lainnya.
+set_var() {
+    local key="$1"
+    local value="$2"
+
+    if grep -qE "^${key}=" "${ENV_FILE}"; then
+        # Pemisah '|' dipakai agar nilai berisi '/' tidak perlu di-escape.
+        sed -i "s|^${key}=.*|${key}=${value}|" "${ENV_FILE}"
+    else
+        echo "${key}=${value}" >> "${ENV_FILE}"
+    fi
+}
+
+current_target() {
+    local host
+    host="$(grep -E '^DB_HOST=' "${ENV_FILE}" | cut -d= -f2-)"
+
+    case "${host}" in
+        mysql)     echo "sail" ;;
+        127.0.0.1) echo "xampp" ;;
+        *)         echo "lain (${host})" ;;
+    esac
+}
+
+case "${1:-status}" in
+    xampp|native|local)
+        set_var DB_HOST 127.0.0.1
+        set_var DB_PORT 3306
+        set_var DB_USERNAME root
+        set_var DB_PASSWORD ""
+        set_var REDIS_HOST 127.0.0.1
+        set_var MAIL_HOST 127.0.0.1
+        # Redis dan Mailpit tidak ada di XAMPP, jadi dijatuhkan ke database/log.
+        set_var CACHE_STORE database
+        set_var SESSION_DRIVER database
+        set_var QUEUE_CONNECTION database
+        set_var MAIL_MAILER log
+
+        echo "Sekarang memakai: XAMPP"
+        echo ""
+        echo "  Pastikan MySQL menyala di XAMPP Control Panel, lalu:"
+        echo "    php artisan migrate:fresh --seed"
+        echo "    npm run dev        # terminal terpisah"
+        echo "    php artisan serve"
+        ;;
+
+    sail|docker)
+        set_var DB_HOST mysql
+        set_var DB_PORT 3306
+        set_var DB_USERNAME sail
+        set_var DB_PASSWORD password
+        set_var REDIS_HOST redis
+        set_var MAIL_HOST mailpit
+        set_var MAIL_MAILER smtp
+
+        echo "Sekarang memakai: Docker / Sail"
+        echo ""
+        echo "  Semua perintah harus lewat container:"
+        echo "    ./dkm up"
+        echo "    ./dkm artisan migrate:fresh --seed"
+        echo "    ./dkm npm run dev  # terminal terpisah"
+        ;;
+
+    status)
+        echo "Environment aktif: $(current_target)"
+        echo ""
+        grep -E '^(DB_HOST|DB_PORT|DB_USERNAME|CACHE_STORE|MAIL_MAILER)=' "${ENV_FILE}"
+        ;;
+
+    *)
+        echo "Pilihan tidak dikenal: ${1}" >&2
+        echo "Gunakan: ./env-switch [xampp|sail|status]" >&2
+        exit 1
+        ;;
+esac

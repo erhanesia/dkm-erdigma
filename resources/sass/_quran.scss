@@ -1,0 +1,382 @@
+// =============================================================================
+// Al-Quran — public site
+// =============================================================================
+//
+// Kept apart from _landing.scss because it is the only part of the public site
+// with its own typeface and its own reading rhythm, and because none of it is
+// used anywhere else.
+//
+// The Arabic face (Scheherazade New) is loaded only on these two pages — see
+// partials/portal/quran-font.blade.php. Every rule that uses it names a real
+// fallback, so a blocked font request degrades to something readable rather
+// than to a wall of boxes.
+// =============================================================================
+
+$quran-arabic: 'Scheherazade New', 'Amiri', 'Traditional Arabic', 'Segoe UI', serif;
+
+// ---------------------------------------------------------------- Search
+
+.quran-search {
+    position: relative;
+    max-width: 30rem;
+
+    > i {
+        position: absolute;
+        top: 50%;
+        left: 1rem;
+        transform: translateY(-50%);
+        color: rgba($white, 0.55);
+        pointer-events: none;
+    }
+
+    .form-control {
+        padding-left: 2.75rem;
+        color: $white;
+        background: rgba($white, 0.12);
+        border-color: rgba($white, 0.2);
+        border-radius: $border-radius-pill;
+
+        &::placeholder {
+            color: rgba($white, 0.55);
+        }
+
+        &:focus {
+            color: $white;
+            background: rgba($white, 0.18);
+            border-color: rgba($white, 0.45);
+            box-shadow: 0 0 0 0.2rem rgba($white, 0.12);
+        }
+    }
+}
+
+// ------------------------------------------------------------ Surah list
+
+// A grid, not a list: 114 rows in a single column is a very long scroll for
+// something people scan by name.
+.quran-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 0.75rem;
+}
+
+.quran-card {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.9rem 1.1rem;
+    text-decoration: none;
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+    transition: transform $transition-base, border-color $transition-base, box-shadow $transition-base;
+
+    &:hover {
+        transform: translateY(-3px);
+        border-color: $brand-300;
+        box-shadow: 0 10px 24px -16px rgba($brand-900, 0.5);
+
+        .quran-card-number {
+            color: $white;
+            background: $brand-700;
+            border-color: $brand-700;
+        }
+
+        .quran-card-arabic {
+            transform: scale(1.06);
+        }
+    }
+}
+
+.quran-card-number {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: $brand-800;
+    background: $brand-50;
+    border: 1px solid $brand-100;
+    border-radius: $border-radius;
+    transition: background-color $transition-base, color $transition-base, border-color $transition-base;
+}
+
+.quran-card-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.quran-card-latin {
+    display: block;
+    font-weight: 600;
+    color: $neutral-900;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quran-card-meta {
+    display: block;
+    font-size: 0.72rem;
+    color: $neutral-500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.quran-card-arabic {
+    flex: 0 0 auto;
+    font-family: $quran-arabic;
+    font-size: 1.45rem;
+    line-height: 1.2;
+    color: $brand-700;
+    transition: transform $transition-base;
+}
+
+// ---------------------------------------------------------- Surah reader
+
+.quran-hero-arabic {
+    font-family: $quran-arabic;
+    font-size: clamp(2.5rem, 7vw, 3.75rem);
+    line-height: 1.5;
+    color: $brand-200;
+}
+
+.quran-hero-audio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+
+    audio {
+        width: min(100%, 26rem);
+        // The stock control is light-on-light against the hero; inverting it
+        // costs nothing and keeps the browser's own player rather than
+        // rebuilding one.
+        filter: invert(1) hue-rotate(180deg) contrast(0.9);
+        border-radius: $border-radius-pill;
+    }
+}
+
+.quran-reciter {
+    font-size: 0.75rem;
+    color: rgba($white, 0.6);
+}
+
+.quran-basmalah {
+    font-family: $quran-arabic;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    line-height: 2;
+    text-align: center;
+    color: $brand-800;
+    margin-bottom: 2rem;
+}
+
+.quran-verses {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.quran-verse {
+    padding: 1.4rem clamp(1rem, 3vw, 1.75rem);
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+    transition: border-color $transition-base, box-shadow $transition-base, background-color $transition-base;
+
+    // Clear of the sticky navbar when jumped to from a link.
+    scroll-margin-top: calc(var(--landing-nav-h) + 1rem);
+
+    &:hover {
+        border-color: $brand-200;
+        box-shadow: 0 8px 24px -18px rgba($brand-900, 0.45);
+    }
+
+    // Linked from the address bar, or currently being recited.
+    &:target,
+    &.is-playing {
+        background: $brand-50;
+        border-color: $brand-300;
+    }
+}
+
+.quran-verse-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.9rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid $neutral-100;
+}
+
+.quran-verse-number {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: $brand-800;
+    background: $brand-50;
+    border-radius: 50%;
+}
+
+.quran-verse-tools {
+    display: flex;
+    gap: 0.25rem;
+
+    /*
+     * Hidden until the verse is hovered, so a page of verses is not a page of
+     * buttons — but always visible where there is no hover to reveal them with,
+     * which is most phones.
+     */
+    opacity: 0;
+    transition: opacity $transition-base;
+
+    @media (hover: none) {
+        opacity: 1;
+    }
+}
+
+.quran-verse:hover .quran-verse-tools,
+.quran-verse:focus-within .quran-verse-tools,
+.quran-verse.is-playing .quran-verse-tools {
+    opacity: 1;
+}
+
+.quran-tool {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+    color: $neutral-500;
+    text-decoration: none;
+    background: transparent;
+    border: 0;
+    border-radius: $border-radius-sm;
+    transition: color $transition-base, background-color $transition-base;
+
+    &:hover {
+        color: $brand-800;
+        background: $brand-50;
+    }
+
+    &.is-done {
+        color: $success;
+    }
+}
+
+.quran-arabic {
+    font-family: $quran-arabic;
+    font-size: clamp(1.6rem, 4.5vw, 2.15rem);
+    // Generous, because Qur'anic text carries far more diacritics than ordinary
+    // Arabic and they need somewhere to go.
+    line-height: 2.15;
+    text-align: right;
+    color: $neutral-900;
+    margin-bottom: 1.1rem;
+}
+
+.quran-latin {
+    font-size: $font-size-sm;
+    font-style: italic;
+    line-height: 1.8;
+    color: $brand-700;
+    margin-bottom: 0.6rem;
+}
+
+.quran-translation {
+    line-height: 1.85;
+    color: $neutral-600;
+    margin-bottom: 0;
+}
+
+// ------------------------------------------------------------- Navigation
+
+.quran-nav {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.quran-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.15rem;
+    font-weight: 600;
+    color: $neutral-700;
+    text-decoration: none;
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+    transition: transform $transition-base, border-color $transition-base;
+
+    small {
+        display: block;
+        font-size: 0.68rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: $neutral-400;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        border-color: $brand-300;
+    }
+}
+
+// ----------------------------------------------------------- Verse player
+
+/*
+ * One player for the whole page, docked at the bottom.
+ *
+ * Playing a verse moves this element rather than creating another, which is
+ * what stops two verses sounding at once — the failure mode of a per-verse
+ * `<audio>` tag.
+ */
+.quran-player {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: $zindex-fixed;
+    padding: 0.75rem 0;
+    background: rgba($white, 0.97);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid $neutral-200;
+    box-shadow: 0 -8px 24px -20px rgba($neutral-900, 0.5);
+    animation: dkm-fade-up 240ms $ease-out both;
+}
+
+.quran-player-title {
+    margin-bottom: 0.2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $neutral-600;
+}
+
+.quran-player-stop {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    color: $neutral-500;
+    background: $neutral-100;
+    border: 0;
+    border-radius: 50%;
+    transition: color $transition-base, background-color $transition-base;
+
+    &:hover {
+        color: $danger;
+        background: $neutral-200;
+    }
+}

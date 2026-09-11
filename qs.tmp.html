@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta name="csrf-token" content="5xENFVkkan6g3v1ET8bJ10gDo2dbun1sunh5Vq24">
+
+    <title>Surat Al-Ikhlas — Musholla Erdigma</title>
+
+    <meta name="description" content="Surat Al-Ikhlas (Ikhlas) — 4 ayat, lengkap dengan terjemahan Bahasa Indonesia dan murottal.">
+    <meta name="theme-color" content="#0f766e">
+
+    
+    <meta property="og:site_name" content="Musholla Erdigma">
+    <meta property="og:title" content="Surat Al-Ikhlas">
+    <meta property="og:description" content="Surat Al-Ikhlas (Ikhlas) — 4 ayat, lengkap dengan terjemahan Bahasa Indonesia dan murottal.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:8000/quran/112">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%95%8C%3C%2Ftext%3E%3C%2Fsvg%3E">
+
+    <script type="module" src="http://[::1]:5174/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5174/resources/sass/app.scss" data-navigate-track="reload" /><script type="module" src="http://[::1]:5174/resources/js/app.js" data-navigate-track="reload"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap">
+<script id="browser-logger-active">
+(function() {
+    const ENDPOINT = 'http://localhost:8000/_boost/browser-logs';
+    const logQueue = [];
+    let flushTimeout = null;
+    const captureTypes = ["error","warning","info","log","debug","table"];
+
+    console.log('🔍 Browser logger active (MCP server detected). Posting to: ' + ENDPOINT);
+
+    // Store original console methods
+    const originalConsole = {
+        log: console.log,
+        debug: console.debug,
+        info: console.info,
+        error: console.error,
+        warn: console.warn,
+        table: console.table
+    };
+
+    // Helper to safely stringify values
+    function safeStringify(obj) {
+        const seen = new WeakSet();
+        return JSON.stringify(obj, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[Circular]';
+                seen.add(value);
+            }
+            if (value instanceof Error) {
+                return {
+                    name: value.name,
+                    message: value.message,
+                    stack: value.stack
+                };
+            }
+            return value;
+        });
+    }
+
+    // Normalize log type for consistency (e.g., 'warn' to 'warning')
+    function normalizeType(type) {
+        return type === 'warn' ? 'warning' : type;
+    }
+
+    // Determine if a log type should be captured based on configured levels
+    function shouldCapture(type) {
+        return captureTypes.includes(normalizeType(type));
+    }
+
+    // Batch and send logs
+    function flushLogs() {
+        if (logQueue.length === 0) return;
+
+        const batch = logQueue.splice(0, logQueue.length);
+
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ logs: batch })
+        }).catch(err => {
+            // Silently fail to avoid infinite loops
+            originalConsole.error('Failed to send logs:', err);
+        });
+    }
+
+    // Debounced flush (100ms)
+    function scheduleFlush() {
+        if (flushTimeout) clearTimeout(flushTimeout);
+        flushTimeout = setTimeout(flushLogs, 100);
+    }
+
+    // Intercept console methods
+    ['log', 'debug', 'info', 'error', 'warn', 'table'].forEach(method => {
+        console[method] = function(...args) {
+            // Call original method
+            originalConsole[method].apply(console, args);
+
+            // Capture log data
+            try {
+                if (!shouldCapture(method)) {
+                    return;
+                }
+
+                logQueue.push({
+                    type: method,
+                    timestamp: new Date().toISOString(),
+                    data: args.map(arg => {
+                        try {
+                            return typeof arg === 'object' ? JSON.parse(safeStringify(arg)) : arg;
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }),
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            } catch (e) {
+                // Fail silently
+            }
+        };
+    });
+
+    // Global error handlers for uncaught errors
+    const originalOnError = window.onerror;
+    window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
+        try {
+            if (shouldCapture('error')) {
+                logQueue.push({
+                    type: 'uncaught_error',
+                    timestamp: new Date().toISOString(),
+                    data: [{
+                        message: errorMsg,
+                        filename: url,
+                        lineno: lineNumber,
+                        colno: colNumber,
+                        error: error ? {
+                            name: error.name,
+                            message: error.message,
+                            stack: error.stack
+                        } : null
+                    }],
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            }
+
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Call original handler if it exists
+        if (originalOnError && typeof originalOnError === 'function') {
+            return originalOnError(errorMsg, url, lineNumber, colNumber, error);
+        }
+
+        // Let the error continue to propagate
+        return false;
+    }
+    window.addEventListener('error', (event) => {
+        try {
+            if (!shouldCapture('error')) {
+                return false;
+            }
+
+            logQueue.push({
+                type: 'window_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error ? {
+                        name: event.error.name,
+                        message: event.error.message,
+                        stack: event.error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the error continue to propagate
+        return false;
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+        try {
+            if (!shouldCapture('error')) {
+                return false;
+            }
+
+            logQueue.push({
+                type: 'error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: 'Unhandled Promise Rejection',
+                    reason: event.reason instanceof Error ? {
+                        name: event.reason.name,
+                        message: event.reason.message,
+                        stack: event.reason.stack
+                    } : event.reason
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the rejection continue to propagate
+        return false;
+    });
+
+    // Flush on page unload
+    window.addEventListener('beforeunload', () => {
+        if (logQueue.length > 0) {
+            navigator.sendBeacon(ENDPOINT, JSON.stringify({ logs: logQueue }));
+        }
+    });
+})();
+</script>
+</head>
+<body class="landing">
+
+
+<nav class="landing-nav">
+    <div class="container d-flex align-items-center justify-content-between py-3">
+        <a href="http://localhost:8000" class="d-flex align-items-center gap-2 text-decoration-none">
+            <span class="landing-mark">🕌</span>
+            <span class="lh-1 d-none d-sm-block">
+                <span class="d-block fw-bold landing-nav-title">Musholla Erdigma</span>
+                <span class="d-block small landing-nav-sub">Manajemen Kemakmuran Masjid</span>
+            </span>
+        </a>
+
+        <div class="d-flex align-items-center gap-1">
+            
+                            <a href="http://localhost:8000"
+                   class="landing-nav-link d-none d-md-inline ">
+                    Beranda
+                </a>
+                            <a href="http://localhost:8000/jadwal-sholat"
+                   class="landing-nav-link d-none d-md-inline ">
+                    Jadwal Sholat
+                </a>
+                            <a href="http://localhost:8000/quran"
+                   class="landing-nav-link d-none d-md-inline ">
+                    Al-Qur&#039;an
+                </a>
+                            <a href="http://localhost:8000/jadwal-jumat"
+                   class="landing-nav-link d-none d-md-inline ">
+                    Khutbah Jumat
+                </a>
+                            <a href="http://localhost:8000/after-hours"
+                   class="landing-nav-link d-none d-md-inline ">
+                    After Hours
+                </a>
+            
+            
+                            <a href="http://localhost:8000/masuk" class="btn btn-primary btn-sm px-3 ms-2">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>
+                    <span class="d-none d-sm-inline">Masuk</span>
+                </a>
+                    </div>
+    </div>
+
+    
+    <div class="landing-nav-mobile d-md-none">
+        <div class="container d-flex gap-1 pb-2">
+                            <a href="http://localhost:8000"
+                   class="landing-nav-link flex-fill text-center ">
+                    Beranda
+                </a>
+                            <a href="http://localhost:8000/jadwal-sholat"
+                   class="landing-nav-link flex-fill text-center ">
+                    Sholat
+                </a>
+                            <a href="http://localhost:8000/quran"
+                   class="landing-nav-link flex-fill text-center ">
+                    Qur&#039;an
+                </a>
+                            <a href="http://localhost:8000/jadwal-jumat"
+                   class="landing-nav-link flex-fill text-center ">
+                    Jumat
+                </a>
+                            <a href="http://localhost:8000/after-hours"
+                   class="landing-nav-link flex-fill text-center ">
+                    After Hours
+                </a>
+                    </div>
+    </div>
+</nav>
+
+
+    <header class="landing-hero landing-hero-compact">
+        <div class="landing-hero-glow" aria-hidden="true"></div>
+
+        <div class="container position-relative">
+            <a href="http://localhost:8000/quran" class="landing-back">
+                <i class="bi bi-arrow-left me-1"></i> Semua surat
+            </a>
+
+            <div class="text-center mt-3" data-aos>
+                <div class="quran-hero-arabic">الاخلاص</div>
+
+                <h1 class="landing-title mt-2">Al-Ikhlas</h1>
+
+                <p class="landing-lead mx-auto text-center mb-0">
+                    Ikhlas · 4 ayat · Mekah
+                </p>
+
+                                    <div class="quran-hero-audio mt-4" data-aos data-aos-delay="60">
+                        <audio controls preload="none" src="https://cdn.equran.id/audio-full/Misyari-Rasyid-Al-Afasi/112.mp3"></audio>
+                                                    <span class="quran-reciter">Murottal: Misyari Rasyid Al-Afasy</span>
+                                            </div>
+                            </div>
+        </div>
+    </header>
+
+    <section class="landing-section">
+        <div class="container">
+
+            
+                            <p class="quran-basmalah" data-aos>بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+            
+            <div class="quran-verses">
+                                    <article class="quran-verse"
+                             id="ayat-1"
+                             data-aos
+                             data-aos-delay="40">
+
+                        <div class="quran-verse-head">
+                            <span class="quran-verse-number">1</span>
+
+                            <div class="quran-verse-tools">
+                                                                    <button type="button"
+                                            class="quran-tool"
+                                            data-quran-play="https://cdn.equran.id/audio-partial/Misyari-Rasyid-Al-Afasi/112001.mp3"
+                                            title="Putar ayat ini"
+                                            aria-label="Putar ayat 1">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                
+                                <button type="button"
+                                        class="quran-tool"
+                                        data-quran-copy="1"
+                                        title="Salin ayat"
+                                        aria-label="Salin ayat 1">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+
+                                <a href="#ayat-1"
+                                   class="quran-tool"
+                                   title="Tautan ke ayat ini"
+                                   aria-label="Tautan ayat 1">
+                                    <i class="bi bi-link-45deg"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <p class="quran-arabic" dir="rtl" lang="ar" data-quran-arabic>قُلْ هُوَ اللّٰهُ اَحَدٌۚ</p>
+
+                        <p class="quran-latin" data-quran-latin>Qul huwallāhu aḥad(un).</p>
+
+                        <p class="quran-translation" data-quran-translation>Katakanlah (Nabi Muhammad), “Dialah Allah Yang Maha Esa.</p>
+                    </article>
+                                    <article class="quran-verse"
+                             id="ayat-2"
+                             data-aos
+                             data-aos-delay="80">
+
+                        <div class="quran-verse-head">
+                            <span class="quran-verse-number">2</span>
+
+                            <div class="quran-verse-tools">
+                                                                    <button type="button"
+                                            class="quran-tool"
+                                            data-quran-play="https://cdn.equran.id/audio-partial/Misyari-Rasyid-Al-Afasi/112002.mp3"
+                                            title="Putar ayat ini"
+                                            aria-label="Putar ayat 2">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                
+                                <button type="button"
+                                        class="quran-tool"
+                                        data-quran-copy="2"
+                                        title="Salin ayat"
+                                        aria-label="Salin ayat 2">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+
+                                <a href="#ayat-2"
+                                   class="quran-tool"
+                                   title="Tautan ke ayat ini"
+                                   aria-label="Tautan ayat 2">
+                                    <i class="bi bi-link-45deg"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <p class="quran-arabic" dir="rtl" lang="ar" data-quran-arabic>اَللّٰهُ الصَّمَدُۚ</p>
+
+                        <p class="quran-latin" data-quran-latin>Allāhuṣ-ṣamad(u).</p>
+
+                        <p class="quran-translation" data-quran-translation>Allah tempat meminta segala sesuatu.</p>
+                    </article>
+                                    <article class="quran-verse"
+                             id="ayat-3"
+                             data-aos
+                             data-aos-delay="120">
+
+                        <div class="quran-verse-head">
+                            <span class="quran-verse-number">3</span>
+
+                            <div class="quran-verse-tools">
+                                                                    <button type="button"
+                                            class="quran-tool"
+                                            data-quran-play="https://cdn.equran.id/audio-partial/Misyari-Rasyid-Al-Afasi/112003.mp3"
+                                            title="Putar ayat ini"
+                                            aria-label="Putar ayat 3">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                
+                                <button type="button"
+                                        class="quran-tool"
+                                        data-quran-copy="3"
+                                        title="Salin ayat"
+                                        aria-label="Salin ayat 3">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+
+                                <a href="#ayat-3"
+                                   class="quran-tool"
+                                   title="Tautan ke ayat ini"
+                                   aria-label="Tautan ayat 3">
+                                    <i class="bi bi-link-45deg"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <p class="quran-arabic" dir="rtl" lang="ar" data-quran-arabic>لَمْ يَلِدْ وَلَمْ يُوْلَدْۙ</p>
+
+                        <p class="quran-latin" data-quran-latin>Lam yalid wa lam yūlad.</p>
+
+                        <p class="quran-translation" data-quran-translation>Dia tidak beranak dan tidak pula diperanakkan</p>
+                    </article>
+                                    <article class="quran-verse"
+                             id="ayat-4"
+                             data-aos
+                             data-aos-delay="160">
+
+                        <div class="quran-verse-head">
+                            <span class="quran-verse-number">4</span>
+
+                            <div class="quran-verse-tools">
+                                                                    <button type="button"
+                                            class="quran-tool"
+                                            data-quran-play="https://cdn.equran.id/audio-partial/Misyari-Rasyid-Al-Afasi/112004.mp3"
+                                            title="Putar ayat ini"
+                                            aria-label="Putar ayat 4">
+                                        <i class="bi bi-play-fill"></i>
+                                    </button>
+                                
+                                <button type="button"
+                                        class="quran-tool"
+                                        data-quran-copy="4"
+                                        title="Salin ayat"
+                                        aria-label="Salin ayat 4">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+
+                                <a href="#ayat-4"
+                                   class="quran-tool"
+                                   title="Tautan ke ayat ini"
+                                   aria-label="Tautan ayat 4">
+                                    <i class="bi bi-link-45deg"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <p class="quran-arabic" dir="rtl" lang="ar" data-quran-arabic>وَلَمْ يَكُنْ لَّهٗ كُفُوًا اَحَدٌ ࣖ</p>
+
+                        <p class="quran-latin" data-quran-latin>Wa lam yakul lahū kufuwan aḥad(un).</p>
+
+                        <p class="quran-translation" data-quran-translation>serta tidak ada sesuatu pun yang setara dengan-Nya.”</p>
+                    </article>
+                            </div>
+
+            
+            <nav class="quran-nav mt-5" data-aos>
+                                    <a href="http://localhost:8000/quran/111"
+                       class="quran-nav-link" rel="prev">
+                        <i class="bi bi-chevron-left"></i>
+                        <span>
+                            <small>Sebelumnya</small>
+                            Al-Lahab
+                        </span>
+                    </a>
+                
+                                    <a href="http://localhost:8000/quran/113"
+                       class="quran-nav-link text-end" rel="next">
+                        <span>
+                            <small>Berikutnya</small>
+                            Al-Falaq
+                        </span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                            </nav>
+        </div>
+    </section>
+
+    
+    <div class="quran-player" data-quran-player hidden>
+        <div class="container d-flex align-items-center gap-3">
+            <button type="button" class="quran-player-stop" data-quran-stop aria-label="Hentikan">
+                <i class="bi bi-x-lg"></i>
+            </button>
+
+            <div class="min-w-0 flex-grow-1">
+                <div class="quran-player-title">
+                    Al-Ikhlas <span data-quran-player-ayah></span>
+                </div>
+                <audio controls preload="none" class="w-100" data-quran-audio></audio>
+            </div>
+        </div>
+    </div>
+
+
+
+<section class="landing-cta">
+    <div class="container text-center" data-aos>
+        <h2 class="landing-cta-title">Pengurus dan karyawan Erdigma</h2>
+        <p class="landing-cta-sub">
+            Masuk untuk mengatur jadwal, memantau perangkat, dan mencatat kehadiran kegiatan.
+        </p>
+
+                    <a href="http://localhost:8000/masuk" class="btn btn-light btn-lg px-4 mt-2">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Masuk ke Sistem
+            </a>
+            </div>
+</section>
+
+
+<footer class="landing-footer">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-md-5">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="landing-mark">🕌</span>
+                    <strong>Musholla Erdigma</strong>
+                </div>
+
+                                    <p class="small mb-0 opacity-75">
+                        <i class="bi bi-geo-alt me-1"></i> Blater, Purbalingga, Jawa Tengah, 53371
+                    </p>
+                            </div>
+
+            <div class="col-6 col-md-4">
+                <h3 class="landing-footer-title">Halaman</h3>
+                <ul class="landing-footer-links">
+                    <li><a href="http://localhost:8000/jadwal-sholat">Jadwal Sholat</a></li>
+                    <li><a href="http://localhost:8000/quran">Al-Qur'an</a></li>
+                    <li><a href="http://localhost:8000/jadwal-jumat">Khutbah Jumat</a></li>
+                    <li><a href="http://localhost:8000/after-hours">After Hours</a></li>
+                                    </ul>
+            </div>
+
+            <div class="col-6 col-md-3 small opacity-75">
+                <h3 class="landing-footer-title">Tentang Jadwal</h3>
+                <p class="mb-0">
+                    Dihitung secara astronomis dengan metode Kemenag RI,
+                    lalu dicocokkan dengan jadwal resmi daerah setempat.
+                </p>
+            </div>
+        </div>
+
+        <hr class="border-light opacity-25 my-4">
+
+        <p class="small mb-0 opacity-75 text-center">
+            © 2026 DKM Erdigma
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>

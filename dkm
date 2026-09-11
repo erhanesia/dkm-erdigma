@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+
+# =============================================================================
+# dkm — pembungkus docker compose untuk project DKM Erdigma
+# =============================================================================
+#
+# Laravel Sail menolak jalan di Git Bash (MINGW64) karena skripnya hanya
+# mengizinkan macOS, Linux, dan WSL2. Padahal yang dilakukannya sekadar
+# memanggil `docker compose`, yang di Git Bash berjalan normal.
+#
+# Skrip ini menyediakan kenyamanan yang sama tanpa batasan OS tersebut.
+#
+# Contoh:
+#   ./dkm up                          nyalakan semua container
+#   ./dkm down                        matikan
+#   ./dkm artisan migrate:fresh --seed
+#   ./dkm npm run dev
+#   ./dkm composer install
+#   ./dkm test
+#   ./dkm shell                       masuk ke dalam container
+#   ./dkm mysql                       klien MySQL
+#   ./dkm logs                        ikuti log
+# =============================================================================
+
+set -euo pipefail
+
+SERVICE="laravel.test"
+
+cd "$(dirname "${BASH_SOURCE[0]}")"
+
+if ! docker info > /dev/null 2>&1; then
+    echo "Docker belum berjalan. Nyalakan Docker Desktop lalu coba lagi." >&2
+    exit 1
+fi
+
+# Menjalankan perintah di dalam container yang sedang hidup; kalau container
+# belum menyala, pakai `run --rm` agar perintah tetap bisa dijalankan.
+run_in_container() {
+    if [ -n "$(docker compose ps -q "${SERVICE}" 2>/dev/null)" ]; then
+        docker compose exec -u sail "${SERVICE}" "$@"
+    else
+        docker compose run --rm -u sail "${SERVICE}" "$@"
+    fi
+}
+
+COMMAND="${1:-help}"
+[ $# -gt 0 ] && shift
+
+case "${COMMAND}" in
+    up)
+        docker compose up -d "$@"
+        echo ""
+        echo "  Aplikasi  : http://localhost:${APP_PORT:-8000}"
+        echo "  Mailpit   : http://localhost:8025"
+        echo "  MySQL     : localhost:3307  (user: sail, password: password)"
+        ;;
+    build)
+        docker compose build "$@"
+        ;;
+    down)
+        docker compose down "$@"
+        ;;
+    restart)
+        docker compose restart "$@"
+        ;;
+    ps|status)
+        docker compose ps
+        ;;
+    logs)
+        docker compose logs -f "$@"
+        ;;
+    artisan|art)
+        run_in_container php artisan "$@"
+        ;;
+    php)
+        run_in_container php "$@"
+        ;;
+    composer)
+        run_in_container composer "$@"
+        ;;
+    npm)
+        run_in_container npm "$@"
+        ;;
+    npx)
+        run_in_container npx "$@"
+        ;;
+    test)
+        run_in_container php artisan test "$@"
+        ;;
+    pint)
+        run_in_container vendor/bin/pint "$@"
+        ;;
+    tinker)
+        run_in_container php artisan tinker
+        ;;
+    shell|bash)
+        run_in_container bash
+        ;;
+    mysql)
+        docker compose exec mysql bash -c 'MYSQL_PWD=${MYSQL_PASSWORD} mysql -u ${MYSQL_USER} ${MYSQL_DATABASE}'
+        ;;
+    fresh)
+        run_in_container php artisan migrate:fresh --seed
+        ;;
+    help|--help|-h)
+        sed -n '4,30p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+        ;;
+    *)
+        echo "Perintah tidak dikenal: ${COMMAND}" >&2
+        echo "Jalankan './dkm help' untuk melihat daftar perintah." >&2
+        exit 1
+        ;;
+esac

@@ -1,0 +1,16 @@
+* text=auto eol=lf
+
+# Shell scripts run inside Linux containers: a CRLF here makes the kernel fail
+# to find the interpreter, with the famously unhelpful "no such file" error.
+*.sh text eol=lf
+docker/entrypoint.sh text eol=lf
+
+*.blade.php diff=html
+*.css diff=css
+*.html diff=html
+*.md diff=markdown
+*.php diff=php
+
+/.github export-ignore
+CHANGELOG.md export-ignore
+.styleci.yml export-ignore

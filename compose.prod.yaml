@@ -1,0 +1,107 @@
+# Production stack for dkm.erdigma.id
+#
+# Run with:  docker compose -f compose.prod.yaml up -d --build
+#
+# Values come from a `.env` sitting next to this file. Nothing secret is
+# hardcoded here, so the file is safe to commit.
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: dkm-erdigma:latest
+        restart: unless-stopped
+        ports:
+            - '${APP_EXPOSED_PORT:-80}:8080'
+        environment:
+            APP_NAME: '${APP_NAME:-DKM Erdigma}'
+            APP_ENV: production
+            APP_KEY: '${APP_KEY}'
+            APP_DEBUG: 'false'
+            APP_URL: '${APP_URL:-https://dkm.erdigma.id}'
+            APP_LOCALE: id
+            APP_TIMEZONE: Asia/Jakarta
+
+            DB_CONNECTION: mysql
+            DB_HOST: mysql
+            DB_PORT: '3306'
+            DB_DATABASE: '${DB_DATABASE:-dkm_erdigma}'
+            DB_USERNAME: '${DB_USERNAME}'
+            DB_PASSWORD: '${DB_PASSWORD}'
+
+            REDIS_HOST: redis
+            REDIS_PORT: '6379'
+            CACHE_STORE: redis
+            SESSION_DRIVER: redis
+            QUEUE_CONNECTION: redis
+
+            # Behind a TLS-terminating proxy the cookie must still be marked secure.
+            SESSION_SECURE_COOKIE: 'true'
+
+            LOG_CHANNEL: stderr
+            LOG_LEVEL: warning
+
+            DKM_MOSQUE_NAME: '${DKM_MOSQUE_NAME:-Musholla Erdigma}'
+            DKM_LATITUDE: '${DKM_LATITUDE:--7.429397}'
+            DKM_LONGITUDE: '${DKM_LONGITUDE:-109.334649}'
+            DKM_ELEVATION: '${DKM_ELEVATION:-90}'
+            DKM_CALCULATION_METHOD: '${DKM_CALCULATION_METHOD:-KEMENAG}'
+        volumes:
+            # Uploaded adhan/murottal files must outlive the container.
+            - dkm-storage:/var/www/html/storage/app
+        depends_on:
+            mysql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        networks:
+            - dkm
+
+    mysql:
+        image: 'mysql:8.4'
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: '${DB_DATABASE:-dkm_erdigma}'
+            MYSQL_USER: '${DB_USERNAME}'
+            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
+        command:
+            - '--character-set-server=utf8mb4'
+            - '--collation-server=utf8mb4_unicode_ci'
+        volumes:
+            - dkm-mysql:/var/lib/mysql
+        networks:
+            - dkm
+        healthcheck:
+            test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-p${DB_ROOT_PASSWORD}']
+            interval: 10s
+            timeout: 5s
+            retries: 10
+            start_period: 30s
+
+    redis:
+        image: 'redis:7-alpine'
+        restart: unless-stopped
+        command: ['redis-server', '--appendonly', 'yes']
+        volumes:
+            - dkm-redis:/data
+        networks:
+            - dkm
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+networks:
+    dkm:
+        driver: bridge
+
+volumes:
+    dkm-mysql:
+        driver: local
+    dkm-redis:
+        driver: local
+    dkm-storage:
+        driver: local

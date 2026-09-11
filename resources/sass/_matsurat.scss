@@ -1,0 +1,406 @@
+// =============================================================================
+// Al-Ma'tsurat
+// =============================================================================
+//
+// Shares the Arabic typography with the Qur'an pages (`.quran-arabic`,
+// `.quran-latin`, `.quran-translation`) rather than restating it — same text,
+// same reading needs, and two copies of a line-height would drift apart.
+//
+// What is here is the part the Qur'an pages do not have: the counter.
+// =============================================================================
+
+// ------------------------------------------------------------------- Toolbar
+
+/*
+ * Sticks below the navigation.
+ *
+ * Someone at the hundredth repetition has scrolled a long way past the top, and
+ * a progress bar they cannot see tells them nothing. The controls ride along.
+ *
+ * What sticks is only the position. Since the navigation stopped painting
+ * itself and became three floating pills, a full-width white band arriving
+ * under them read as a leftover from the old design — so the chrome moved to
+ * the row inside, and the toolbar floats the same way the navigation does.
+ */
+.matsurat-bar {
+    position: sticky;
+    // Clear of the pills, with a gap: two floating things, not one stack.
+    top: calc(var(--landing-nav-h) + 0.4rem);
+    z-index: $zindex-sticky - 1;
+    padding: 0.4rem 0;
+    // The margins beside the toolbar are see-through, and clicks belong to the
+    // reading underneath them.
+    pointer-events: none;
+}
+
+.matsurat-bar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.45rem 0.85rem;
+    pointer-events: auto;
+    background: rgba($white, 0.9);
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-pill;
+    box-shadow: 0 12px 30px -20px rgba($brand-950, 0.55);
+    backdrop-filter: blur(12px);
+    transition: background-color $transition-base, border-color $transition-base;
+
+    // Finished. A quiet change, not a fanfare — the card below says it plainly.
+    .matsurat-bar.is-complete & {
+        background: rgba($brand-50, 0.94);
+        border-color: $brand-200;
+    }
+
+    // A pill is the wrong shape once the controls wrap onto a second line.
+    @include media-breakpoint-down(md) {
+        border-radius: $border-radius-lg;
+    }
+}
+
+.matsurat-switch {
+    display: flex;
+    flex: 0 0 auto;
+    padding: 0.15rem;
+    background: $neutral-100;
+    border-radius: $border-radius-pill;
+}
+
+.matsurat-switch-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.28rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $neutral-500;
+    text-decoration: none;
+    border-radius: $border-radius-pill;
+    transition: color $transition-base, background-color $transition-base;
+
+    &:hover {
+        color: $brand-800;
+    }
+
+    &.is-on {
+        color: $white;
+        background: $brand-700;
+    }
+}
+
+.matsurat-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex: 1 1 8rem;
+    min-width: 0;
+
+    // Below md the two switches already fill the line, so the progress takes
+    // one of its own rather than being squeezed into whatever is left.
+    @include media-breakpoint-down(md) {
+        flex: 1 1 100%;
+    }
+}
+
+.matsurat-progress {
+    flex: 1 1 auto;
+    height: 6px;
+    min-width: 0;
+    background: $neutral-200;
+    border-radius: $border-radius-pill;
+    overflow: hidden;
+
+    > span {
+        display: block;
+        width: 0;
+        height: 100%;
+        background: linear-gradient(90deg, $brand-500, $brand-700);
+        border-radius: inherit;
+        // Slow enough to be seen, short enough not to lag behind a fast tap.
+        transition: width 320ms $ease-out;
+    }
+}
+
+.matsurat-count {
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: $neutral-500;
+
+    strong {
+        color: $brand-800;
+    }
+}
+
+.matsurat-reset {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    color: $neutral-400;
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    transition: color $transition-base, background-color $transition-base;
+
+    &:hover {
+        color: $danger;
+        background: $neutral-100;
+    }
+}
+
+// -------------------------------------------------------------------- Items
+
+.matsurat-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.matsurat-item {
+    padding: 1.35rem clamp(1rem, 3vw, 1.75rem);
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+    transition: border-color $transition-base, box-shadow $transition-base, opacity $transition-base;
+
+    scroll-margin-top: calc(var(--landing-nav-h) + 4rem);
+
+    &:hover {
+        border-color: $brand-200;
+        box-shadow: 0 8px 24px -18px rgba($brand-900, 0.45);
+    }
+
+    /*
+     * Finished items recede rather than disappear.
+     *
+     * Hiding them would break the sequence, and the sequence is what
+     * Al-Ma'tsurat is — but leaving them at full weight makes it hard to find
+     * where you are.
+     */
+    &.is-done {
+        border-color: $brand-200;
+        background: $brand-50;
+
+        .quran-arabic,
+        .quran-latin,
+        .quran-translation {
+            opacity: 0.55;
+        }
+
+        .matsurat-number {
+            color: $white;
+            background: $brand-700;
+        }
+    }
+}
+
+.matsurat-item-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.85rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid $neutral-100;
+}
+
+.matsurat-number {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: $brand-800;
+    background: $brand-50;
+    border-radius: 50%;
+    transition: color $transition-base, background-color $transition-base;
+}
+
+.matsurat-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: $neutral-900;
+}
+
+// What the entry is: "Al-Baqarah · Sapi Betina". Only surah entries have one.
+.matsurat-source {
+    font-size: 0.78rem;
+    color: $neutral-400;
+}
+
+/*
+ * One ayah, with its own transliteration and translation.
+ *
+ * A printed copy has to set a surah as one block of Arabic followed by one
+ * block of translation; on a screen the two can stay beside each other, and
+ * that pairing is the reason the newer text is worth the change.
+ */
+.matsurat-verse + .matsurat-verse {
+    padding-top: 0.9rem;
+    margin-top: 0.9rem;
+    border-top: 1px dashed $neutral-200;
+}
+
+.matsurat-verse-label {
+    display: inline-block;
+    margin-bottom: 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $neutral-400;
+}
+
+.matsurat-repeat {
+    flex: 0 0 auto;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: $brand-800;
+    background: $brand-100;
+    border-radius: $border-radius-pill;
+}
+
+// ------------------------------------------------------------------ Counter
+
+.matsurat-count-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 0.85rem;
+    padding-top: 1rem;
+    margin-top: 1.1rem;
+    border-top: 1px solid $neutral-100;
+}
+
+.matsurat-tap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $white;
+    background: $brand-700;
+    border: 0;
+    border-radius: $border-radius-pill;
+    transition: transform 180ms $ease-out, background-color $transition-base;
+
+    &:hover {
+        background: $brand-800;
+    }
+
+    // Pressed. Short, so it keeps up with rapid tapping.
+    &.is-tapped {
+        transform: scale(0.94);
+    }
+
+    &.is-single {
+        color: $brand-800;
+        background: $brand-50;
+
+        &:hover {
+            background: $brand-100;
+        }
+    }
+}
+
+.matsurat-item.is-done .matsurat-tap {
+    color: $brand-800;
+    background: $brand-100;
+}
+
+.matsurat-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.28rem;
+
+    > span {
+        width: 8px;
+        height: 8px;
+        background: $neutral-200;
+        border-radius: 50%;
+        transition: background-color 200ms $ease-out, transform 200ms $ease-out;
+
+        &.is-on {
+            background: $brand-600;
+            transform: scale(1.15);
+        }
+    }
+}
+
+.matsurat-tally {
+    margin-left: auto;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    color: $neutral-500;
+
+    strong {
+        color: $brand-800;
+    }
+}
+
+// --------------------------------------------------------------- Completion
+
+.matsurat-done {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.35rem 1.5rem;
+    margin-top: 1.25rem;
+    color: $brand-900;
+    background: $brand-50;
+    border: 1px solid $brand-200;
+    border-radius: $border-radius-lg;
+    animation: dkm-fade-up 420ms $ease-out both;
+
+    > i {
+        font-size: 1.75rem;
+        color: $brand-600;
+    }
+}
+
+// While Livewire fetches the other reading. Dimmed rather than emptied, so the
+// page keeps its height and the scroll position does not jump.
+.landing-section.is-switching {
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 140ms $ease-out;
+}
+
+// The switch controls are buttons now, not links.
+button.matsurat-switch-item {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+
+    &.is-on {
+        background: $brand-700;
+    }
+}
+
+// Names which reading is on screen, so the page still says what it is showing
+// after the toolbar scrolls out of view.
+.matsurat-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: $neutral-700;
+
+    > span {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: $neutral-400;
+    }
+}

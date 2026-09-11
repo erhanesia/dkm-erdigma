@@ -1,0 +1,2472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    
+    <meta name="csrf-token" content="eLDWGaK3cM9klBx3TV6lcnzsgPXvwMj798HZJpZG">
+
+    <title>Al-Quran — Musholla Erdigma</title>
+
+    <meta name="description" content="Baca Al-Quran 30 juz lengkap dengan terjemahan Bahasa Indonesia, transliterasi latin, dan murottal.">
+    <meta name="theme-color" content="#0f766e">
+
+    
+    <meta property="og:site_name" content="Musholla Erdigma">
+    <meta property="og:title" content="Al-Quran">
+    <meta property="og:description" content="Baca Al-Quran 30 juz lengkap dengan terjemahan Bahasa Indonesia, transliterasi latin, dan murottal.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:8000/quran">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%95%8C%3C%2Ftext%3E%3C%2Fsvg%3E">
+
+    <script type="module" src="http://[::1]:5174/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5174/resources/sass/app.scss" data-navigate-track="reload" /><script type="module" src="http://[::1]:5174/resources/js/app.js" data-navigate-track="reload"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap">
+<script id="browser-logger-active">
+(function() {
+    const ENDPOINT = 'http://localhost:8000/_boost/browser-logs';
+    const logQueue = [];
+    let flushTimeout = null;
+    const captureTypes = ["error","warning","info","log","debug","table"];
+
+    console.log('🔍 Browser logger active (MCP server detected). Posting to: ' + ENDPOINT);
+
+    // Store original console methods
+    const originalConsole = {
+        log: console.log,
+        debug: console.debug,
+        info: console.info,
+        error: console.error,
+        warn: console.warn,
+        table: console.table
+    };
+
+    // Helper to safely stringify values
+    function safeStringify(obj) {
+        const seen = new WeakSet();
+        return JSON.stringify(obj, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[Circular]';
+                seen.add(value);
+            }
+            if (value instanceof Error) {
+                return {
+                    name: value.name,
+                    message: value.message,
+                    stack: value.stack
+                };
+            }
+            return value;
+        });
+    }
+
+    // Normalize log type for consistency (e.g., 'warn' to 'warning')
+    function normalizeType(type) {
+        return type === 'warn' ? 'warning' : type;
+    }
+
+    // Determine if a log type should be captured based on configured levels
+    function shouldCapture(type) {
+        return captureTypes.includes(normalizeType(type));
+    }
+
+    // Batch and send logs
+    function flushLogs() {
+        if (logQueue.length === 0) return;
+
+        const batch = logQueue.splice(0, logQueue.length);
+
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ logs: batch })
+        }).catch(err => {
+            // Silently fail to avoid infinite loops
+            originalConsole.error('Failed to send logs:', err);
+        });
+    }
+
+    // Debounced flush (100ms)
+    function scheduleFlush() {
+        if (flushTimeout) clearTimeout(flushTimeout);
+        flushTimeout = setTimeout(flushLogs, 100);
+    }
+
+    // Intercept console methods
+    ['log', 'debug', 'info', 'error', 'warn', 'table'].forEach(method => {
+        console[method] = function(...args) {
+            // Call original method
+            originalConsole[method].apply(console, args);
+
+            // Capture log data
+            try {
+                if (!shouldCapture(method)) {
+                    return;
+                }
+
+                logQueue.push({
+                    type: method,
+                    timestamp: new Date().toISOString(),
+                    data: args.map(arg => {
+                        try {
+                            return typeof arg === 'object' ? JSON.parse(safeStringify(arg)) : arg;
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }),
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            } catch (e) {
+                // Fail silently
+            }
+        };
+    });
+
+    // Global error handlers for uncaught errors
+    const originalOnError = window.onerror;
+    window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
+        try {
+            if (shouldCapture('error')) {
+                logQueue.push({
+                    type: 'uncaught_error',
+                    timestamp: new Date().toISOString(),
+                    data: [{
+                        message: errorMsg,
+                        filename: url,
+                        lineno: lineNumber,
+                        colno: colNumber,
+                        error: error ? {
+                            name: error.name,
+                            message: error.message,
+                            stack: error.stack
+                        } : null
+                    }],
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            }
+
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Call original handler if it exists
+        if (originalOnError && typeof originalOnError === 'function') {
+            return originalOnError(errorMsg, url, lineNumber, colNumber, error);
+        }
+
+        // Let the error continue to propagate
+        return false;
+    }
+    window.addEventListener('error', (event) => {
+        try {
+            if (!shouldCapture('error')) {
+                return false;
+            }
+
+            logQueue.push({
+                type: 'window_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error ? {
+                        name: event.error.name,
+                        message: event.error.message,
+                        stack: event.error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the error continue to propagate
+        return false;
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+        try {
+            if (!shouldCapture('error')) {
+                return false;
+            }
+
+            logQueue.push({
+                type: 'error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: 'Unhandled Promise Rejection',
+                    reason: event.reason instanceof Error ? {
+                        name: event.reason.name,
+                        message: event.reason.message,
+                        stack: event.reason.stack
+                    } : event.reason
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the rejection continue to propagate
+        return false;
+    });
+
+    // Flush on page unload
+    window.addEventListener('beforeunload', () => {
+        if (logQueue.length > 0) {
+            navigator.sendBeacon(ENDPOINT, JSON.stringify({ logs: logQueue }));
+        }
+    });
+})();
+</script>
+</head>
+<body class="landing">
+
+
+<nav class="landing-nav">
+    <div class="container d-flex align-items-center justify-content-between py-3">
+        <a href="http://localhost:8000" class="d-flex align-items-center gap-2 text-decoration-none">
+            <span class="landing-mark">🕌</span>
+            <span class="lh-1 d-none d-sm-block">
+                <span class="d-block fw-bold landing-nav-title">Musholla Erdigma</span>
+                <span class="d-block small landing-nav-sub">Manajemen Kemakmuran Masjid</span>
+            </span>
+        </a>
+
+        <div class="d-flex align-items-center gap-1">
+            
+                            <a href="http://localhost:8000"
+                   class="landing-nav-link d-none d-md-inline ">
+                    Beranda
+                </a>
+                            <a href="http://localhost:8000/jadwal-sholat"
+                   class="landing-nav-link d-none d-md-inline ">
+                    Jadwal Sholat
+                </a>
+                            <a href="http://localhost:8000/quran"
+                   class="landing-nav-link d-none d-md-inline is-active">
+                    Al-Qur&#039;an
+                </a>
+                            <a href="http://localhost:8000/jadwal-jumat"
+                   class="landing-nav-link d-none d-md-inline ">
+                    Khutbah Jumat
+                </a>
+                            <a href="http://localhost:8000/after-hours"
+                   class="landing-nav-link d-none d-md-inline ">
+                    After Hours
+                </a>
+            
+            
+                            <a href="http://localhost:8000/masuk" class="btn btn-primary btn-sm px-3 ms-2">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>
+                    <span class="d-none d-sm-inline">Masuk</span>
+                </a>
+                    </div>
+    </div>
+
+    
+    <div class="landing-nav-mobile d-md-none">
+        <div class="container d-flex gap-1 pb-2">
+                            <a href="http://localhost:8000"
+                   class="landing-nav-link flex-fill text-center ">
+                    Beranda
+                </a>
+                            <a href="http://localhost:8000/jadwal-sholat"
+                   class="landing-nav-link flex-fill text-center ">
+                    Sholat
+                </a>
+                            <a href="http://localhost:8000/quran"
+                   class="landing-nav-link flex-fill text-center is-active">
+                    Qur&#039;an
+                </a>
+                            <a href="http://localhost:8000/jadwal-jumat"
+                   class="landing-nav-link flex-fill text-center ">
+                    Jumat
+                </a>
+                            <a href="http://localhost:8000/after-hours"
+                   class="landing-nav-link flex-fill text-center ">
+                    After Hours
+                </a>
+                    </div>
+    </div>
+</nav>
+
+
+    <header class="landing-hero landing-hero-compact">
+        <div class="landing-hero-glow" aria-hidden="true"></div>
+
+        <div class="container position-relative text-center" data-aos>
+            <span class="landing-eyebrow">
+                <i class="bi bi-book me-1"></i> 114 surat · 30 juz
+            </span>
+
+            <h1 class="landing-title mt-3">Al-Qur'an</h1>
+
+            <p class="landing-lead mx-auto text-center">
+                Lengkap dengan terjemahan Bahasa Indonesia, transliterasi latin,
+                dan murottal per ayat.
+            </p>
+
+            
+            <div class="quran-search mx-auto mt-4" data-aos data-aos-delay="60">
+                <i class="bi bi-search"></i>
+                <input type="search"
+                       class="form-control"
+                       placeholder="Cari surat — nama, arti, atau nomor…"
+                       autocomplete="off"
+                       data-quran-search
+                       aria-label="Cari surat">
+            </div>
+        </div>
+    </header>
+
+    <section class="landing-section">
+        <div class="container">
+
+                            <p class="text-center landing-sub mb-4" data-quran-count>
+                    114 surat
+                </p>
+
+                <div class="quran-grid" data-quran-list>
+                                            <a href="http://localhost:8000/quran/1"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-fatihah pembukaan 1 mekah"
+                           data-aos
+                           data-aos-delay="30">
+
+                            <span class="quran-card-number">1</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Fatihah</span>
+                                <span class="quran-card-meta">
+                                    Pembukaan · 7 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الفاتحة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/2"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-baqarah sapi 2 madinah"
+                           data-aos
+                           data-aos-delay="60">
+
+                            <span class="quran-card-number">2</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Baqarah</span>
+                                <span class="quran-card-meta">
+                                    Sapi · 286 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">البقرة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/3"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="ali &#039;imran keluarga imran 3 madinah"
+                           data-aos
+                           data-aos-delay="90">
+
+                            <span class="quran-card-number">3</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Ali &#039;Imran</span>
+                                <span class="quran-card-meta">
+                                    Keluarga Imran · 200 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">اٰل عمران</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/4"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="an-nisa&#039; wanita 4 madinah"
+                           data-aos
+                           data-aos-delay="120">
+
+                            <span class="quran-card-number">4</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">An-Nisa&#039;</span>
+                                <span class="quran-card-meta">
+                                    Wanita · 176 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">النساۤء</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/5"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-ma&#039;idah hidangan 5 madinah"
+                           data-aos
+                           data-aos-delay="150">
+
+                            <span class="quran-card-number">5</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Ma&#039;idah</span>
+                                <span class="quran-card-meta">
+                                    Hidangan · 120 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الماۤئدة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/6"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-an&#039;am binatang ternak 6 mekah"
+                           data-aos
+                           data-aos-delay="180">
+
+                            <span class="quran-card-number">6</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-An&#039;am</span>
+                                <span class="quran-card-meta">
+                                    Binatang Ternak · 165 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الانعام</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/7"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-a&#039;raf tempat tertinggi 7 mekah"
+                           data-aos
+                           data-aos-delay="210">
+
+                            <span class="quran-card-number">7</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-A&#039;raf</span>
+                                <span class="quran-card-meta">
+                                    Tempat Tertinggi · 206 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الاعراف</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/8"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-anfal rampasan perang 8 madinah"
+                           data-aos
+                           data-aos-delay="240">
+
+                            <span class="quran-card-number">8</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Anfal</span>
+                                <span class="quran-card-meta">
+                                    Rampasan Perang · 75 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الانفال</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/9"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="at-taubah pengampunan 9 madinah"
+                           data-aos
+                           data-aos-delay="270">
+
+                            <span class="quran-card-number">9</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">At-Taubah</span>
+                                <span class="quran-card-meta">
+                                    Pengampunan · 129 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">التوبة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/10"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="yunus yunus 10 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">10</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Yunus</span>
+                                <span class="quran-card-meta">
+                                    Yunus · 109 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">يونس</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/11"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="hud hud 11 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">11</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Hud</span>
+                                <span class="quran-card-meta">
+                                    Hud · 123 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">هود</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/12"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="yusuf yusuf 12 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">12</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Yusuf</span>
+                                <span class="quran-card-meta">
+                                    Yusuf · 111 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">يوسف</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/13"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="ar-ra&#039;d guruh 13 madinah"
+                           data-aos
+                           data-aos-delay="30">
+
+                            <span class="quran-card-number">13</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Ar-Ra&#039;d</span>
+                                <span class="quran-card-meta">
+                                    Guruh · 43 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الرّعد</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/14"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="ibrahim ibrahim 14 mekah"
+                           data-aos
+                           data-aos-delay="60">
+
+                            <span class="quran-card-number">14</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Ibrahim</span>
+                                <span class="quran-card-meta">
+                                    Ibrahim · 52 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">ابرٰهيم</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/15"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-hijr hijr 15 mekah"
+                           data-aos
+                           data-aos-delay="90">
+
+                            <span class="quran-card-number">15</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Hijr</span>
+                                <span class="quran-card-meta">
+                                    Hijr · 99 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الحجر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/16"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="an-nahl lebah 16 mekah"
+                           data-aos
+                           data-aos-delay="120">
+
+                            <span class="quran-card-number">16</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">An-Nahl</span>
+                                <span class="quran-card-meta">
+                                    Lebah · 128 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">النحل</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/17"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-isra&#039; memperjalankan malam hari 17 mekah"
+                           data-aos
+                           data-aos-delay="150">
+
+                            <span class="quran-card-number">17</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Isra&#039;</span>
+                                <span class="quran-card-meta">
+                                    Memperjalankan Malam Hari · 111 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الاسراۤء</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/18"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-kahf goa 18 mekah"
+                           data-aos
+                           data-aos-delay="180">
+
+                            <span class="quran-card-number">18</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Kahf</span>
+                                <span class="quran-card-meta">
+                                    Goa · 110 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الكهف</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/19"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="maryam maryam 19 mekah"
+                           data-aos
+                           data-aos-delay="210">
+
+                            <span class="quran-card-number">19</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Maryam</span>
+                                <span class="quran-card-meta">
+                                    Maryam · 98 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">مريم</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/20"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="taha taha 20 mekah"
+                           data-aos
+                           data-aos-delay="240">
+
+                            <span class="quran-card-number">20</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Taha</span>
+                                <span class="quran-card-meta">
+                                    Taha · 135 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">طٰهٰ</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/21"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-anbiya&#039; para nabi 21 mekah"
+                           data-aos
+                           data-aos-delay="270">
+
+                            <span class="quran-card-number">21</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Anbiya&#039;</span>
+                                <span class="quran-card-meta">
+                                    Para Nabi · 112 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الانبياۤء</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/22"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-hajj haji 22 madinah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">22</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Hajj</span>
+                                <span class="quran-card-meta">
+                                    Haji · 78 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الحج</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/23"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-mu&#039;minun orang-orang mukmin 23 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">23</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Mu&#039;minun</span>
+                                <span class="quran-card-meta">
+                                    Orang-Orang Mukmin · 118 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">المؤمنون</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/24"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="an-nur cahaya 24 madinah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">24</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">An-Nur</span>
+                                <span class="quran-card-meta">
+                                    Cahaya · 64 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">النّور</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/25"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-furqan pembeda 25 mekah"
+                           data-aos
+                           data-aos-delay="30">
+
+                            <span class="quran-card-number">25</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Furqan</span>
+                                <span class="quran-card-meta">
+                                    Pembeda · 77 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الفرقان</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/26"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="asy-syu&#039;ara&#039; para penyair 26 mekah"
+                           data-aos
+                           data-aos-delay="60">
+
+                            <span class="quran-card-number">26</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Asy-Syu&#039;ara&#039;</span>
+                                <span class="quran-card-meta">
+                                    Para Penyair · 227 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الشعراۤء</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/27"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="an-naml semut-semut 27 mekah"
+                           data-aos
+                           data-aos-delay="90">
+
+                            <span class="quran-card-number">27</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">An-Naml</span>
+                                <span class="quran-card-meta">
+                                    Semut-semut · 93 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">النمل</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/28"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-qasas kisah-kisah 28 mekah"
+                           data-aos
+                           data-aos-delay="120">
+
+                            <span class="quran-card-number">28</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Qasas</span>
+                                <span class="quran-card-meta">
+                                    Kisah-Kisah · 88 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">القصص</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/29"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-&#039;ankabut laba-laba 29 mekah"
+                           data-aos
+                           data-aos-delay="150">
+
+                            <span class="quran-card-number">29</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-&#039;Ankabut</span>
+                                <span class="quran-card-meta">
+                                    Laba-Laba · 69 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">العنكبوت</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/30"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="ar-rum romawi 30 mekah"
+                           data-aos
+                           data-aos-delay="180">
+
+                            <span class="quran-card-number">30</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Ar-Rum</span>
+                                <span class="quran-card-meta">
+                                    Romawi · 60 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الرّوم</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/31"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="luqman luqman 31 mekah"
+                           data-aos
+                           data-aos-delay="210">
+
+                            <span class="quran-card-number">31</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Luqman</span>
+                                <span class="quran-card-meta">
+                                    Luqman · 34 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">لقمٰن</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/32"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="as-sajdah sajdah 32 mekah"
+                           data-aos
+                           data-aos-delay="240">
+
+                            <span class="quran-card-number">32</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">As-Sajdah</span>
+                                <span class="quran-card-meta">
+                                    Sajdah · 30 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">السّجدة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/33"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-ahzab golongan yang bersekutu 33 madinah"
+                           data-aos
+                           data-aos-delay="270">
+
+                            <span class="quran-card-number">33</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Ahzab</span>
+                                <span class="quran-card-meta">
+                                    Golongan Yang Bersekutu · 73 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الاحزاب</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/34"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="saba&#039; saba&#039; 34 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">34</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Saba&#039;</span>
+                                <span class="quran-card-meta">
+                                    Saba&#039; · 54 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">سبأ</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/35"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="fatir maha pencipta 35 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">35</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Fatir</span>
+                                <span class="quran-card-meta">
+                                    Maha Pencipta · 45 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">فاطر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/36"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="yasin yasin 36 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">36</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Yasin</span>
+                                <span class="quran-card-meta">
+                                    Yasin · 83 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">يٰسۤ</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/37"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="as-saffat barisan-barisan 37 mekah"
+                           data-aos
+                           data-aos-delay="30">
+
+                            <span class="quran-card-number">37</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">As-Saffat</span>
+                                <span class="quran-card-meta">
+                                    Barisan-Barisan · 182 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الصّٰۤفّٰت</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/38"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="sad sad 38 mekah"
+                           data-aos
+                           data-aos-delay="60">
+
+                            <span class="quran-card-number">38</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Sad</span>
+                                <span class="quran-card-meta">
+                                    Sad · 88 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">ص</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/39"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="az-zumar rombongan 39 mekah"
+                           data-aos
+                           data-aos-delay="90">
+
+                            <span class="quran-card-number">39</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Az-Zumar</span>
+                                <span class="quran-card-meta">
+                                    Rombongan · 75 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الزمر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/40"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="ghafir maha pengampun 40 mekah"
+                           data-aos
+                           data-aos-delay="120">
+
+                            <span class="quran-card-number">40</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Ghafir</span>
+                                <span class="quran-card-meta">
+                                    Maha Pengampun · 85 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">غافر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/41"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="fussilat yang dijelaskan 41 mekah"
+                           data-aos
+                           data-aos-delay="150">
+
+                            <span class="quran-card-number">41</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Fussilat</span>
+                                <span class="quran-card-meta">
+                                    Yang Dijelaskan · 54 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">فصّلت</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/42"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="asy-syura musyawarah 42 mekah"
+                           data-aos
+                           data-aos-delay="180">
+
+                            <span class="quran-card-number">42</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Asy-Syura</span>
+                                <span class="quran-card-meta">
+                                    Musyawarah · 53 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الشورى</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/43"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="az-zukhruf perhiasan 43 mekah"
+                           data-aos
+                           data-aos-delay="210">
+
+                            <span class="quran-card-number">43</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Az-Zukhruf</span>
+                                <span class="quran-card-meta">
+                                    Perhiasan · 89 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الزخرف</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/44"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="ad-dukhan kabut 44 mekah"
+                           data-aos
+                           data-aos-delay="240">
+
+                            <span class="quran-card-number">44</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Ad-Dukhan</span>
+                                <span class="quran-card-meta">
+                                    Kabut · 59 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الدخان</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/45"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-jasiyah berlutut 45 mekah"
+                           data-aos
+                           data-aos-delay="270">
+
+                            <span class="quran-card-number">45</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Jasiyah</span>
+                                <span class="quran-card-meta">
+                                    Berlutut · 37 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الجاثية</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/46"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-ahqaf bukit pasir 46 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">46</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Ahqaf</span>
+                                <span class="quran-card-meta">
+                                    Bukit Pasir · 35 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الاحقاف</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/47"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="muhammad muhammad 47 madinah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">47</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Muhammad</span>
+                                <span class="quran-card-meta">
+                                    Muhammad · 38 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">محمّد</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/48"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-fath kemenangan 48 madinah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">48</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Fath</span>
+                                <span class="quran-card-meta">
+                                    Kemenangan · 29 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الفتح</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/49"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-hujurat kamar-kamar 49 madinah"
+                           data-aos
+                           data-aos-delay="30">
+
+                            <span class="quran-card-number">49</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Hujurat</span>
+                                <span class="quran-card-meta">
+                                    Kamar-Kamar · 18 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الحجرٰت</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/50"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="qaf qaf 50 mekah"
+                           data-aos
+                           data-aos-delay="60">
+
+                            <span class="quran-card-number">50</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Qaf</span>
+                                <span class="quran-card-meta">
+                                    Qaf · 45 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">ق</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/51"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="az-zariyat angin yang menerbangkan 51 mekah"
+                           data-aos
+                           data-aos-delay="90">
+
+                            <span class="quran-card-number">51</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Az-Zariyat</span>
+                                <span class="quran-card-meta">
+                                    Angin yang Menerbangkan · 60 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الذّٰريٰت</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/52"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="at-tur bukit tursina 52 mekah"
+                           data-aos
+                           data-aos-delay="120">
+
+                            <span class="quran-card-number">52</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">At-Tur</span>
+                                <span class="quran-card-meta">
+                                    Bukit Tursina · 49 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الطور</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/53"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="an-najm bintang 53 mekah"
+                           data-aos
+                           data-aos-delay="150">
+
+                            <span class="quran-card-number">53</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">An-Najm</span>
+                                <span class="quran-card-meta">
+                                    Bintang · 62 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">النجم</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/54"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-qamar bulan 54 mekah"
+                           data-aos
+                           data-aos-delay="180">
+
+                            <span class="quran-card-number">54</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Qamar</span>
+                                <span class="quran-card-meta">
+                                    Bulan · 55 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">القمر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/55"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="ar-rahman maha pengasih 55 madinah"
+                           data-aos
+                           data-aos-delay="210">
+
+                            <span class="quran-card-number">55</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Ar-Rahman</span>
+                                <span class="quran-card-meta">
+                                    Maha Pengasih · 78 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الرحمن</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/56"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-waqi&#039;ah hari kiamat 56 mekah"
+                           data-aos
+                           data-aos-delay="240">
+
+                            <span class="quran-card-number">56</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Waqi&#039;ah</span>
+                                <span class="quran-card-meta">
+                                    Hari Kiamat · 96 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الواقعة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/57"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-hadid besi 57 madinah"
+                           data-aos
+                           data-aos-delay="270">
+
+                            <span class="quran-card-number">57</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Hadid</span>
+                                <span class="quran-card-meta">
+                                    Besi · 29 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الحديد</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/58"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-mujadilah gugatan 58 madinah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">58</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Mujadilah</span>
+                                <span class="quran-card-meta">
+                                    Gugatan · 22 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">المجادلة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/59"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-hasyr pengusiran 59 madinah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">59</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Hasyr</span>
+                                <span class="quran-card-meta">
+                                    Pengusiran · 24 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الحشر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/60"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-mumtahanah wanita yang diuji 60 madinah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">60</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Mumtahanah</span>
+                                <span class="quran-card-meta">
+                                    Wanita Yang Diuji · 13 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الممتحنة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/61"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="as-saff barisan 61 madinah"
+                           data-aos
+                           data-aos-delay="30">
+
+                            <span class="quran-card-number">61</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">As-Saff</span>
+                                <span class="quran-card-meta">
+                                    Barisan · 14 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الصّفّ</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/62"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-jumu&#039;ah jumat 62 madinah"
+                           data-aos
+                           data-aos-delay="60">
+
+                            <span class="quran-card-number">62</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Jumu&#039;ah</span>
+                                <span class="quran-card-meta">
+                                    Jumat · 11 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الجمعة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/63"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-munafiqun orang-orang munafik 63 madinah"
+                           data-aos
+                           data-aos-delay="90">
+
+                            <span class="quran-card-number">63</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Munafiqun</span>
+                                <span class="quran-card-meta">
+                                    Orang-Orang Munafik · 11 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">المنٰفقون</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/64"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="at-tagabun pengungkapan kesalahan 64 madinah"
+                           data-aos
+                           data-aos-delay="120">
+
+                            <span class="quran-card-number">64</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">At-Tagabun</span>
+                                <span class="quran-card-meta">
+                                    Pengungkapan Kesalahan · 18 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">التغابن</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/65"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="at-talaq talak 65 madinah"
+                           data-aos
+                           data-aos-delay="150">
+
+                            <span class="quran-card-number">65</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">At-Talaq</span>
+                                <span class="quran-card-meta">
+                                    Talak · 12 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الطلاق</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/66"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="at-tahrim pengharaman 66 madinah"
+                           data-aos
+                           data-aos-delay="180">
+
+                            <span class="quran-card-number">66</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">At-Tahrim</span>
+                                <span class="quran-card-meta">
+                                    Pengharaman · 12 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">التحريم</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/67"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-mulk kerajaan 67 mekah"
+                           data-aos
+                           data-aos-delay="210">
+
+                            <span class="quran-card-number">67</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Mulk</span>
+                                <span class="quran-card-meta">
+                                    Kerajaan · 30 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الملك</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/68"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-qalam pena 68 mekah"
+                           data-aos
+                           data-aos-delay="240">
+
+                            <span class="quran-card-number">68</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Qalam</span>
+                                <span class="quran-card-meta">
+                                    Pena · 52 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">القلم</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/69"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-haqqah hari kiamat 69 mekah"
+                           data-aos
+                           data-aos-delay="270">
+
+                            <span class="quran-card-number">69</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Haqqah</span>
+                                <span class="quran-card-meta">
+                                    Hari Kiamat · 52 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الحاۤقّة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/70"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-ma&#039;arij tempat naik 70 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">70</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Ma&#039;arij</span>
+                                <span class="quran-card-meta">
+                                    Tempat Naik · 44 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">المعارج</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/71"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="nuh nuh 71 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">71</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Nuh</span>
+                                <span class="quran-card-meta">
+                                    Nuh · 28 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">نوح</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/72"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-jinn jin 72 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">72</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Jinn</span>
+                                <span class="quran-card-meta">
+                                    Jin · 28 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الجن</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/73"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-muzzammil orang yang berselimut 73 mekah"
+                           data-aos
+                           data-aos-delay="30">
+
+                            <span class="quran-card-number">73</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Muzzammil</span>
+                                <span class="quran-card-meta">
+                                    Orang Yang Berselimut · 20 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">المزّمّل</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/74"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-muddassir orang yang berkemul 74 mekah"
+                           data-aos
+                           data-aos-delay="60">
+
+                            <span class="quran-card-number">74</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Muddassir</span>
+                                <span class="quran-card-meta">
+                                    Orang Yang Berkemul · 56 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">المدّثّر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/75"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-qiyamah hari kiamat 75 mekah"
+                           data-aos
+                           data-aos-delay="90">
+
+                            <span class="quran-card-number">75</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Qiyamah</span>
+                                <span class="quran-card-meta">
+                                    Hari Kiamat · 40 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">القيٰمة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/76"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-insan manusia 76 madinah"
+                           data-aos
+                           data-aos-delay="120">
+
+                            <span class="quran-card-number">76</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Insan</span>
+                                <span class="quran-card-meta">
+                                    Manusia · 31 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الانسان</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/77"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-mursalat malaikat yang diutus 77 mekah"
+                           data-aos
+                           data-aos-delay="150">
+
+                            <span class="quran-card-number">77</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Mursalat</span>
+                                <span class="quran-card-meta">
+                                    Malaikat Yang Diutus · 50 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">المرسلٰت</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/78"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="an-naba&#039; berita besar 78 mekah"
+                           data-aos
+                           data-aos-delay="180">
+
+                            <span class="quran-card-number">78</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">An-Naba&#039;</span>
+                                <span class="quran-card-meta">
+                                    Berita Besar · 40 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">النبأ</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/79"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="an-nazi&#039;at malaikat yang mencabut 79 mekah"
+                           data-aos
+                           data-aos-delay="210">
+
+                            <span class="quran-card-number">79</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">An-Nazi&#039;at</span>
+                                <span class="quran-card-meta">
+                                    Malaikat Yang Mencabut · 46 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">النّٰزعٰت</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/80"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="&#039;abasa bermuka masam 80 mekah"
+                           data-aos
+                           data-aos-delay="240">
+
+                            <span class="quran-card-number">80</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">&#039;Abasa</span>
+                                <span class="quran-card-meta">
+                                    Bermuka Masam · 42 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">عبس</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/81"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="at-takwir penggulungan 81 mekah"
+                           data-aos
+                           data-aos-delay="270">
+
+                            <span class="quran-card-number">81</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">At-Takwir</span>
+                                <span class="quran-card-meta">
+                                    Penggulungan · 29 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">التكوير</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/82"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-infitar terbelah 82 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">82</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Infitar</span>
+                                <span class="quran-card-meta">
+                                    Terbelah · 19 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الانفطار</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/83"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-mutaffifin orang-orang curang 83 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">83</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Mutaffifin</span>
+                                <span class="quran-card-meta">
+                                    Orang-Orang Curang · 36 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">المطفّفين</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/84"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-insyiqaq terbelah 84 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">84</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Insyiqaq</span>
+                                <span class="quran-card-meta">
+                                    Terbelah · 25 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الانشقاق</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/85"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-buruj gugusan bintang 85 mekah"
+                           data-aos
+                           data-aos-delay="30">
+
+                            <span class="quran-card-number">85</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Buruj</span>
+                                <span class="quran-card-meta">
+                                    Gugusan Bintang · 22 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">البروج</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/86"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="at-tariq yang datang di malam hari 86 mekah"
+                           data-aos
+                           data-aos-delay="60">
+
+                            <span class="quran-card-number">86</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">At-Tariq</span>
+                                <span class="quran-card-meta">
+                                    Yang Datang Di Malam Hari · 17 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الطارق</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/87"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-a&#039;la maha tinggi 87 mekah"
+                           data-aos
+                           data-aos-delay="90">
+
+                            <span class="quran-card-number">87</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-A&#039;la</span>
+                                <span class="quran-card-meta">
+                                    Maha Tinggi · 19 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الاعلى</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/88"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-gasyiyah hari kiamat 88 mekah"
+                           data-aos
+                           data-aos-delay="120">
+
+                            <span class="quran-card-number">88</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Gasyiyah</span>
+                                <span class="quran-card-meta">
+                                    Hari Kiamat · 26 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الغاشية</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/89"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-fajr fajar 89 mekah"
+                           data-aos
+                           data-aos-delay="150">
+
+                            <span class="quran-card-number">89</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Fajr</span>
+                                <span class="quran-card-meta">
+                                    Fajar · 30 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الفجر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/90"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-balad negeri 90 mekah"
+                           data-aos
+                           data-aos-delay="180">
+
+                            <span class="quran-card-number">90</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Balad</span>
+                                <span class="quran-card-meta">
+                                    Negeri · 20 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">البلد</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/91"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="asy-syams matahari 91 mekah"
+                           data-aos
+                           data-aos-delay="210">
+
+                            <span class="quran-card-number">91</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Asy-Syams</span>
+                                <span class="quran-card-meta">
+                                    Matahari · 15 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الشمس</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/92"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-lail malam 92 mekah"
+                           data-aos
+                           data-aos-delay="240">
+
+                            <span class="quran-card-number">92</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Lail</span>
+                                <span class="quran-card-meta">
+                                    Malam · 21 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الّيل</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/93"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="ad-duha duha 93 mekah"
+                           data-aos
+                           data-aos-delay="270">
+
+                            <span class="quran-card-number">93</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Ad-Duha</span>
+                                <span class="quran-card-meta">
+                                    Duha · 11 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الضحى</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/94"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-insyirah lapang 94 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">94</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Insyirah</span>
+                                <span class="quran-card-meta">
+                                    Lapang · 8 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الشرح</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/95"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="at-tin buah tin 95 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">95</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">At-Tin</span>
+                                <span class="quran-card-meta">
+                                    Buah Tin · 8 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">التين</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/96"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-&#039;alaq segumpal darah 96 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">96</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-&#039;Alaq</span>
+                                <span class="quran-card-meta">
+                                    Segumpal Darah · 19 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">العلق</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/97"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-qadr kemuliaan 97 mekah"
+                           data-aos
+                           data-aos-delay="30">
+
+                            <span class="quran-card-number">97</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Qadr</span>
+                                <span class="quran-card-meta">
+                                    Kemuliaan · 5 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">القدر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/98"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-bayyinah bukti nyata 98 madinah"
+                           data-aos
+                           data-aos-delay="60">
+
+                            <span class="quran-card-number">98</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Bayyinah</span>
+                                <span class="quran-card-meta">
+                                    Bukti Nyata · 8 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">البيّنة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/99"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="az-zalzalah guncangan 99 madinah"
+                           data-aos
+                           data-aos-delay="90">
+
+                            <span class="quran-card-number">99</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Az-Zalzalah</span>
+                                <span class="quran-card-meta">
+                                    Guncangan · 8 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الزلزلة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/100"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-&#039;adiyat kuda yang berlari kencang 100 mekah"
+                           data-aos
+                           data-aos-delay="120">
+
+                            <span class="quran-card-number">100</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-&#039;Adiyat</span>
+                                <span class="quran-card-meta">
+                                    Kuda Yang Berlari Kencang · 11 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">العٰديٰت</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/101"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-qari&#039;ah hari kiamat 101 mekah"
+                           data-aos
+                           data-aos-delay="150">
+
+                            <span class="quran-card-number">101</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Qari&#039;ah</span>
+                                <span class="quran-card-meta">
+                                    Hari Kiamat · 11 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">القارعة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/102"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="at-takasur bermegah-megahan 102 mekah"
+                           data-aos
+                           data-aos-delay="180">
+
+                            <span class="quran-card-number">102</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">At-Takasur</span>
+                                <span class="quran-card-meta">
+                                    Bermegah-Megahan · 8 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">التكاثر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/103"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-&#039;asr masa 103 mekah"
+                           data-aos
+                           data-aos-delay="210">
+
+                            <span class="quran-card-number">103</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-&#039;Asr</span>
+                                <span class="quran-card-meta">
+                                    Masa · 3 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">العصر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/104"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-humazah pengumpat 104 mekah"
+                           data-aos
+                           data-aos-delay="240">
+
+                            <span class="quran-card-number">104</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Humazah</span>
+                                <span class="quran-card-meta">
+                                    Pengumpat · 9 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الهمزة</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/105"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-fil gajah 105 mekah"
+                           data-aos
+                           data-aos-delay="270">
+
+                            <span class="quran-card-number">105</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Fil</span>
+                                <span class="quran-card-meta">
+                                    Gajah · 5 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الفيل</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/106"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="quraisy quraisy 106 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">106</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Quraisy</span>
+                                <span class="quran-card-meta">
+                                    Quraisy · 4 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">قريش</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/107"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-ma&#039;un barang yang berguna 107 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">107</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Ma&#039;un</span>
+                                <span class="quran-card-meta">
+                                    Barang Yang Berguna · 7 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الماعون</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/108"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-kausar pemberian yang banyak 108 mekah"
+                           data-aos
+                           data-aos-delay="300">
+
+                            <span class="quran-card-number">108</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Kausar</span>
+                                <span class="quran-card-meta">
+                                    Pemberian Yang Banyak · 3 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الكوثر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/109"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-kafirun orang-orang kafir 109 mekah"
+                           data-aos
+                           data-aos-delay="30">
+
+                            <span class="quran-card-number">109</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Kafirun</span>
+                                <span class="quran-card-meta">
+                                    Orang-Orang kafir · 6 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الكٰفرون</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/110"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="an-nasr pertolongan 110 madinah"
+                           data-aos
+                           data-aos-delay="60">
+
+                            <span class="quran-card-number">110</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">An-Nasr</span>
+                                <span class="quran-card-meta">
+                                    Pertolongan · 3 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">النصر</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/111"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-lahab api yang bergejolak 111 mekah"
+                           data-aos
+                           data-aos-delay="90">
+
+                            <span class="quran-card-number">111</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Lahab</span>
+                                <span class="quran-card-meta">
+                                    Api Yang Bergejolak · 5 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">اللهب</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/112"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-ikhlas ikhlas 112 mekah"
+                           data-aos
+                           data-aos-delay="120">
+
+                            <span class="quran-card-number">112</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Ikhlas</span>
+                                <span class="quran-card-meta">
+                                    Ikhlas · 4 ayat · Mekah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الاخلاص</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/113"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="al-falaq subuh 113 madinah"
+                           data-aos
+                           data-aos-delay="150">
+
+                            <span class="quran-card-number">113</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">Al-Falaq</span>
+                                <span class="quran-card-meta">
+                                    Subuh · 5 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الفلق</span>
+                        </a>
+                                            <a href="http://localhost:8000/quran/114"
+                           class="quran-card"
+                           data-quran-item
+                           data-search="an-nas manusia 114 madinah"
+                           data-aos
+                           data-aos-delay="180">
+
+                            <span class="quran-card-number">114</span>
+
+                            <span class="quran-card-body">
+                                <span class="quran-card-latin">An-Nas</span>
+                                <span class="quran-card-meta">
+                                    Manusia · 6 ayat · Madinah
+                                </span>
+                            </span>
+
+                            <span class="quran-card-arabic">الناس</span>
+                        </a>
+                                    </div>
+
+                
+                <div class="landing-empty mt-4" data-quran-empty style="display:none;">
+                    <i class="bi bi-search"></i>
+                    <p class="mb-0">Tidak ada surat yang cocok.</p>
+                </div>
+                    </div>
+    </section>
+
+
+
+<section class="landing-cta">
+    <div class="container text-center" data-aos>
+        <h2 class="landing-cta-title">Pengurus dan karyawan Erdigma</h2>
+        <p class="landing-cta-sub">
+            Masuk untuk mengatur jadwal, memantau perangkat, dan mencatat kehadiran kegiatan.
+        </p>
+
+                    <a href="http://localhost:8000/masuk" class="btn btn-light btn-lg px-4 mt-2">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Masuk ke Sistem
+            </a>
+            </div>
+</section>
+
+
+<footer class="landing-footer">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-md-5">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="landing-mark">🕌</span>
+                    <strong>Musholla Erdigma</strong>
+                </div>
+
+                                    <p class="small mb-0 opacity-75">
+                        <i class="bi bi-geo-alt me-1"></i> Blater, Purbalingga, Jawa Tengah, 53371
+                    </p>
+                            </div>
+
+            <div class="col-6 col-md-4">
+                <h3 class="landing-footer-title">Halaman</h3>
+                <ul class="landing-footer-links">
+                    <li><a href="http://localhost:8000/jadwal-sholat">Jadwal Sholat</a></li>
+                    <li><a href="http://localhost:8000/quran">Al-Qur'an</a></li>
+                    <li><a href="http://localhost:8000/jadwal-jumat">Khutbah Jumat</a></li>
+                    <li><a href="http://localhost:8000/after-hours">After Hours</a></li>
+                                    </ul>
+            </div>
+
+            <div class="col-6 col-md-3 small opacity-75">
+                <h3 class="landing-footer-title">Tentang Jadwal</h3>
+                <p class="mb-0">
+                    Dihitung secara astronomis dengan metode Kemenag RI,
+                    lalu dicocokkan dengan jadwal resmi daerah setempat.
+                </p>
+            </div>
+        </div>
+
+        <hr class="border-light opacity-25 my-4">
+
+        <p class="small mb-0 opacity-75 text-center">
+            © 2026 DKM Erdigma
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>
