@@ -506,6 +506,101 @@
     }
 }
 
+/*
+ * A month of Fridays, side by side.
+ *
+ * There are four of them, five at most, and a stacked list made a month look
+ * like an open-ended feed — you had to reach the end to know how much of it
+ * there was. As a row, the whole month is one glance.
+ *
+ * `auto-fit` with `1fr` rather than a fixed column count: five Fridays get five
+ * columns, four get four, and either way the row ends where the toolbar above
+ * it does rather than leaving gutters down both sides.
+ */
+.landing-friday-grid {
+    $gap: 1rem;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: $gap;
+
+    /*
+     * A month that is only half filled in.
+     *
+     * Stretched to the full width, one Friday becomes a banner and two become
+     * slabs — the layout implying there is more here than there is. Left
+     * aligned instead, so a short month reads as the beginning of a row that
+     * simply ends early.
+     *
+     * The cap is stated as a third of the row rather than a round number of
+     * rems: it is exactly the width these cards have when there are three of
+     * them, at every container size, so a card is the same size whether it has
+     * two neighbours or none.
+     */
+    &.is-sparse {
+        grid-template-columns: repeat(auto-fit, minmax(13rem, calc((100% - #{$gap * 2}) / 3)));
+        justify-content: start;
+    }
+
+    // One column on a phone either way — a capped card there would sit in the
+    // middle of the screen with a margin down one side.
+    @include media-breakpoint-down(sm) {
+        &,
+        &.is-sparse {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+/*
+ * The same card, turned on its side to live in that grid.
+ *
+ * A column is a third the width the row layout needs, so the date, the roster
+ * and the time stack instead — the date as a pill at the top, the time along
+ * the bottom edge where it lines up across the whole row.
+ */
+.landing-friday.is-grid {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    height: 100%;
+    padding: 1.1rem 1.15rem;
+    margin-bottom: 0;
+
+    // Sideways is for a list. In a row, the card that lifts is the one under
+    // the cursor.
+    &:hover {
+        transform: translateY(-3px);
+    }
+
+    .landing-friday-date {
+        display: flex;
+        align-items: baseline;
+        gap: 0.35rem;
+        align-self: flex-start;
+        width: auto;
+        padding: 0.3rem 0.6rem;
+    }
+
+    .landing-friday-day {
+        font-size: 1.15rem;
+    }
+
+    // `margin-top: auto` pins the time to the bottom of whichever card is
+    // tallest, so the row keeps one baseline however long the themes run.
+    .landing-friday-time {
+        display: flex;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 0.7rem;
+        border-top: 1px solid $neutral-200;
+    }
+
+    .landing-chevron {
+        margin-left: auto;
+    }
+}
+
 .landing-friday-date {
     display: grid;
     place-items: center;
@@ -1253,6 +1348,11 @@
  * dropped into it: no border of its own, no second background.
  */
 .landing-toolbar {
+    // Positioned so the month panel opens over the cards rather than under
+    // them: everything after this bar is later in the document, and would
+    // otherwise paint on top.
+    position: relative;
+    z-index: 3;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1302,6 +1402,138 @@
     }
 }
 
+/*
+ * The month, and the panel that changes it.
+ *
+ * A native `<select>` hands the list to the operating system, which draws it in
+ * its own voice — the one control on the page that ignores everything else on
+ * it. This is an ordinary button with an ordinary panel underneath, so the
+ * months read in the same type, on the same white, with the same brand green
+ * marking the one you are on.
+ */
+.landing-toolbar-picker {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.landing-toolbar-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.7rem;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $neutral-900;
+    background: transparent;
+    border: 0;
+    border-radius: $border-radius-pill;
+    transition: background-color $transition-base;
+
+    > i:first-child {
+        color: $brand-600;
+    }
+
+    &:hover {
+        background: $neutral-100;
+    }
+}
+
+// Turns over when the panel is open, so the button says which way it will go.
+.landing-toolbar-caret {
+    font-size: 0.7rem;
+    color: $neutral-400;
+    transition: transform $transition-base;
+
+    &.is-open {
+        transform: rotate(180deg);
+    }
+}
+
+.landing-toolbar-panel {
+    position: absolute;
+    top: calc(100% + 0.55rem);
+    left: 0;
+    z-index: $zindex-dropdown;
+    width: 17rem;
+    max-width: calc(100vw - 2.5rem);
+    padding: 0.6rem;
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow-lg;
+}
+
+.landing-toolbar-years {
+    display: flex;
+    gap: 0.25rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid $neutral-100;
+}
+
+.landing-toolbar-year {
+    flex: 1 1 0;
+    padding: 0.3rem 0;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $neutral-500;
+    background: transparent;
+    border: 0;
+    border-radius: $border-radius-pill;
+    transition: color $transition-base, background-color $transition-base;
+
+    &:hover {
+        color: $neutral-900;
+        background: $neutral-100;
+    }
+
+    &.is-active {
+        color: $white;
+        background: $brand-700;
+    }
+}
+
+// Three across: a year reads as a block of twelve rather than a list to scroll.
+.landing-toolbar-months {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
+}
+
+.landing-toolbar-pick {
+    padding: 0.45rem 0.25rem;
+    font-size: $font-size-sm;
+    color: $neutral-700;
+    background: transparent;
+    border: 0;
+    border-radius: $border-radius;
+    transition: color $transition-base, background-color $transition-base;
+
+    &:hover {
+        color: $brand-800;
+        background: $brand-50;
+    }
+
+    &.is-active {
+        font-weight: 600;
+        color: $white;
+        background: $brand-700;
+    }
+}
+
+// The slot holds its column whether or not a request is in flight, so nothing
+// shuffles sideways when one starts.
+.landing-toolbar-spinner {
+    display: grid;
+    place-items: center;
+    flex: 0 0 1.35rem;
+    color: $brand-600;
+}
+
 .landing-toolbar-month {
     display: flex;
     align-items: center;
@@ -1330,6 +1562,23 @@
 
     > * {
         animation: dkm-fade-up 420ms $ease-out both;
+    }
+}
+
+/*
+ * The same two states for the Friday cards.
+ *
+ * Only the dimming is restated: the cards carry their own `data-aos` entrance
+ * and arrive in sequence from the delays already in the markup, so a second
+ * animation on the wrapper would fight with them.
+ */
+.landing-friday-swap {
+    transition: opacity 180ms $ease-out, filter 180ms $ease-out;
+
+    &.is-fetching {
+        opacity: 0.45;
+        filter: saturate(0.6);
+        pointer-events: none;
     }
 }
 
@@ -1378,7 +1627,8 @@
         padding: 0.2rem 0.85rem 0.45rem;
     }
 
-    .landing-toolbar-city {
+    .landing-toolbar-city,
+    .landing-toolbar-picker {
         flex: 1 1 100%;
         padding-block: 0.5rem;
     }

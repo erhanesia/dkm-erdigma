@@ -5,10 +5,14 @@
     noticeboard days in advance, so it belongs on a public page — their contact
     details do not, and are never passed here.
 
-    Expects: $friday, $isFeatured (bool)
+    Expects: $friday, $isFeatured (bool), $isGrid (bool, optional)
+
+    `$isGrid` stacks the same card vertically so it can sit beside its siblings
+    in a month grid. The list form is the default: in a half-width column on the
+    home page there is no room to put four of them side by side.
 --}}
 <a href="{{ route('portal.friday-schedules.show', ['date' => $friday->date->toDateString()]) }}"
-   class="landing-friday {{ $isFeatured ? 'is-featured' : '' }}">
+   class="landing-friday {{ ($isGrid ?? false) ? 'is-grid' : '' }} {{ $isFeatured ? 'is-featured' : '' }}">
     <div class="landing-friday-date">
         <span class="landing-friday-day">{{ $friday->date->format('d') }}</span>
         <span class="landing-friday-month">
