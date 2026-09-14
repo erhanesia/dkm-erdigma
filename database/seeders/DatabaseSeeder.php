@@ -29,6 +29,10 @@ class DatabaseSeeder extends Seeder
                 DemoUserSeeder::class,
                 DemoEmployeeSeeder::class,
                 DemoScheduleSeeder::class,
+                // History, so the reports and dashboards have a past to summarise.
+                DemoAfterHoursHistorySeeder::class,
+                DemoRosterHistorySeeder::class,
+                DemoAudioOperationsSeeder::class,
             ]);
         }
 

@@ -519,6 +519,43 @@
 }
 
 // -----------------------------------------------------------------------------
+// Duty sheet — the on-screen preview of the printed roster
+// -----------------------------------------------------------------------------
+//
+// The same table the PDF renders (`pages/prayer-duties/_sheet`), styled for the
+// screen. Paper has its own stylesheet inside the PDF view: dompdf reads
+// neither Bootstrap nor this file, so nothing here reaches the printout.
+
+.duty-sheet__table {
+    // Centred over their three columns, the prayer names read as headings for
+    // the group rather than as one more column label.
+    .duty-sheet__prayer {
+        text-align: center;
+        color: $neutral-700;
+    }
+
+    // Where one prayer's columns end and the next begin.
+    .duty-sheet__group-start {
+        border-left: 1px solid $border-color;
+    }
+
+    .duty-sheet__date,
+    .duty-sheet__time {
+        white-space: nowrap;
+    }
+
+    .duty-sheet__time {
+        font-variant-numeric: tabular-nums;
+    }
+
+    .duty-sheet__empty {
+        padding: 2rem 1rem;
+        text-align: center;
+        color: $neutral-500;
+    }
+}
+
+// -----------------------------------------------------------------------------
 // Empty state
 // -----------------------------------------------------------------------------
 

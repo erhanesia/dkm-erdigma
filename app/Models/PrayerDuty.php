@@ -76,4 +76,17 @@ class PrayerDuty extends Model
             DateHelper::toCarbon($to)->toDateString(),
         ]);
     }
+
+    /**
+     * Only the prayers the roster covers — see `PrayerName::rostered()`.
+     *
+     * @param  Builder<PrayerDuty>  $query
+     */
+    public function scopeRostered(Builder $query): void
+    {
+        $query->whereIn('prayer', array_map(
+            static fn (PrayerName $prayer): string => $prayer->value,
+            PrayerName::rostered(),
+        ));
+    }
 }
