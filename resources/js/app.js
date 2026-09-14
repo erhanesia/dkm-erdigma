@@ -24,7 +24,7 @@ import 'tom-select/dist/css/tom-select.bootstrap5.css';
 import { initCharts, destroyCharts } from './modules/charts';
 import { initCountdown, stopCountdown } from './modules/countdown';
 import { initSidebar } from './modules/sidebar';
-import { clearNavigating, markNavigating, syncActiveNavLink } from './modules/navigation';
+import { bindMonthCarry, clearNavigating, markNavigating, syncActiveNavLink } from './modules/navigation';
 import { initGeolocation } from './modules/geolocation';
 import { initCalibration } from './modules/calibration';
 import { bindSubmitFeedback, markFormSubmitting } from './modules/form-submit';
@@ -294,6 +294,7 @@ function teardownUi() {
 document.addEventListener('DOMContentLoaded', () => {
     bindConfirmations();
     bindSubmitFeedback();
+    bindMonthCarry();
     initSidebar();
     bootUi();
 });

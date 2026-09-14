@@ -551,9 +551,15 @@
      * simply ends early.
      *
      * The cap is stated as a third of the row rather than a round number of
-     * rems: it is exactly the width these cards have when there are three of
-     * them, at every container size, so a card is the same size whether it has
-     * two neighbours or none.
+     * rems: from md up it is exactly the width these cards have when there are
+     * three of them, so a card is the same size whether it has two neighbours
+     * or none.
+     *
+     * Between sm and md a third of the row is narrower than 13rem, and the
+     * 13rem floor wins — on purpose. A full month at that width wraps to two
+     * columns rather than three, so there is no three-across width to match,
+     * and a true third (about 160px) would be narrower than any card the full
+     * grid ever draws.
      */
     &.is-sparse {
         grid-template-columns: repeat(auto-fit, minmax(13rem, calc((100% - #{$gap * 2}) / 3)));

@@ -37,6 +37,13 @@
 </head>
 <body class="landing @yield('body-class')">
 
+{{--
+    The two schedule pages keep the month being read in `?bulan=`. Their links
+    are marked `data-carry-month`, so `bindMonthCarry()` (navigation.js) copies
+    that month onto them from the address bar as they are about to be followed.
+--}}
+@php($monthPages = ['portal.prayer-schedules', 'portal.friday-schedules'])
+
 {{-- ---------------------------------------------------------------- Navbar --}}
 <nav class="landing-nav" data-landing-nav>
     <div class="container d-flex align-items-center justify-content-between py-3">
@@ -63,6 +70,7 @@
                 ] as $route => $label)
                     <a href="{{ route($route) }}"
                        wire:navigate
+                       @if (in_array($route, $monthPages, true)) data-carry-month @endif
                        class="landing-nav-link {{ request()->routeIs($route) ? 'is-active' : '' }}">
                         {{ $label }}
                     </a>
@@ -132,6 +140,7 @@
         ] as $route => [$label, $icon])
             <a href="{{ route($route) }}"
                wire:navigate
+               @if (in_array($route, $monthPages, true)) data-carry-month @endif
                class="landing-menu-link {{ request()->routeIs($route) ? 'is-active' : '' }}">
                 <i class="bi bi-{{ $icon }}"></i>
                 <span>{{ $label }}</span>
@@ -199,10 +208,10 @@
             <div class="col-6 col-md-4">
                 <h3 class="landing-footer-title">Halaman</h3>
                 <ul class="landing-footer-links">
-                    <li><a href="{{ route('portal.prayer-schedules') }}">Jadwal Sholat</a></li>
+                    <li><a href="{{ route('portal.prayer-schedules') }}" data-carry-month>Jadwal Sholat</a></li>
                     <li><a href="{{ route('portal.quran') }}">Al-Qur'an</a></li>
                     <li><a href="{{ route('portal.matsurat') }}">Al-Ma'tsurat</a></li>
-                    <li><a href="{{ route('portal.friday-schedules') }}">Khutbah Jumat</a></li>
+                    <li><a href="{{ route('portal.friday-schedules') }}" data-carry-month>Khutbah Jumat</a></li>
                     <li><a href="{{ route('portal.sessions') }}">After Hours</a></li>
                 </ul>
             </div>

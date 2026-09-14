@@ -44,6 +44,11 @@ class PublicFridayMonth extends Component
      * into a chat thread, and still survives a refresh. It is the same `bulan`
      * the prayer page uses, in the same format, so stepping between the two
      * keeps the month the visitor was reading.
+     *
+     * `keep` alone does not carry it across: it only keeps `?bulan=` in this
+     * page's address bar. The links between the two pages are marked
+     * `data-carry-month`, and `bindMonthCarry()` in navigation.js copies the
+     * month onto them as they are followed.
      */
     #[Url(as: 'bulan', keep: true)]
     public string $month = '';
