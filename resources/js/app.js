@@ -74,10 +74,19 @@ function initSelects() {
             return;
         }
 
+        /*
+         * `data-creatable` lets a value that is not in the list be typed in — a
+         * new place, say. The typed text becomes the value sent, and the server
+         * adds it to its list, so the next form offers it like any other.
+         */
+        const creatable = element.dataset.creatable !== undefined;
+
         new TomSelect(element, {
             plugins: element.multiple ? ['remove_button'] : [],
             maxOptions: null,
             placeholder: element.dataset.placeholder ?? 'Cari lalu pilih…',
+            create: creatable,
+            createOnBlur: creatable,
 
             /*
              * Render the dropdown on <body> rather than inside the field.
@@ -91,6 +100,7 @@ function initSelects() {
 
             render: {
                 no_results: () => '<div class="no-results py-2 px-3 text-muted">Tidak ada hasil.</div>',
+                option_create: (data, escape) => `<div class="create py-2 px-3">Tambahkan <strong>${escape(data.input)}</strong>…</div>`,
             },
         });
     });

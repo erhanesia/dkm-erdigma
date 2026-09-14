@@ -10,6 +10,7 @@ use App\Models\AfterHoursSession;
 use App\Models\MentoringGroup;
 use App\Models\User;
 use App\Repositories\Contracts\AfterHoursSessionRepositoryInterface;
+use App\Repositories\Contracts\AfterHoursSessionSeriesRepositoryInterface;
 use App\Repositories\Contracts\AttendanceRepositoryInterface;
 use App\Repositories\Contracts\MentoringGroupRepositoryInterface;
 use App\Support\Helpers\DateHelper;
@@ -29,6 +30,8 @@ class AfterHoursSessionService
         private readonly AfterHoursSessionRepositoryInterface $sessions,
         private readonly AttendanceRepositoryInterface $attendances,
         private readonly MentoringGroupRepositoryInterface $groups,
+        private readonly AfterHoursSessionSeriesRepositoryInterface $series,
+        private readonly LocationService $locations,
     ) {}
 
     /**
@@ -53,8 +56,12 @@ class AfterHoursSessionService
         $group = $this->groups->findOrFail((int) $attributes['mentoring_group_id']);
 
         return DB::transaction(function () use ($attributes, $group, $actor): AfterHoursSession {
+            $place = $this->locations->resolve($attributes['location'] ?? null);
+
             $session = $this->sessions->create([
                 ...$attributes,
+                'location' => $place['name'],
+                'location_id' => $place['id'],
                 'mentor_id' => $attributes['mentor_id'] ?? $group->mentor_id,
                 'qr_token' => TokenHelper::generateSessionToken(),
                 'created_by' => $actor->id,
@@ -76,9 +83,18 @@ class AfterHoursSessionService
             throw new BusinessRuleException('Sesi yang sudah selesai tidak dapat diubah.');
         }
 
-        $this->guardTimeWindow($attributes);
+        // Only a caller that sends a time has one to check. The edit form no
+        // longer does: moving a session is what reschedule() is for.
+        if (isset($attributes['starts_at'], $attributes['ends_at'])) {
+            $this->guardTimeWindow($attributes);
+        }
 
         return DB::transaction(function () use ($session, $attributes): AfterHoursSession {
+            if (array_key_exists('location', $attributes)) {
+                $place = $this->locations->resolve($attributes['location']);
+                $attributes = [...$attributes, 'location' => $place['name'], 'location_id' => $place['id']];
+            }
+
             $updated = $this->sessions->update($session, $attributes);
 
             $this->attendances->seedForSession($updated->load('group'));
@@ -90,6 +106,75 @@ class AfterHoursSessionService
     public function delete(AfterHoursSession $session): void
     {
         $this->sessions->delete($session);
+    }
+
+    /**
+     * Moves a session to a new time, remembering the time it was first set for
+     * so every screen can say it moved instead of quietly showing a new date.
+     *
+     * With `$withFollowing` on a session from a series, the same shift carries
+     * to every later session of that series that can still move — scheduled,
+     * not yet started, and with nobody marked present. Past and completed
+     * meetings are never touched, so a series' history stays what happened.
+     *
+     * Attendance rows and the QR token stay as they are; the check-in window
+     * follows the new time by itself.
+     *
+     * @return int How many sessions moved.
+     */
+    public function reschedule(
+        AfterHoursSession $session,
+        CarbonImmutable $startsAt,
+        CarbonImmutable $endsAt,
+        ?string $reason = null,
+        bool $withFollowing = false,
+    ): int {
+        if ($session->status !== SessionStatus::Scheduled) {
+            throw new BusinessRuleException('Hanya kegiatan berstatus Terjadwal yang bisa dijadwal ulang.');
+        }
+
+        if ($endsAt->lessThanOrEqualTo($startsAt)) {
+            throw new BusinessRuleException('Waktu selesai harus setelah waktu mulai.');
+        }
+
+        $shift = $startsAt->getTimestamp() - $session->starts_at->getTimestamp();
+        $duration = $endsAt->getTimestamp() - $startsAt->getTimestamp();
+        $moveSeries = $withFollowing && $session->series_id !== null;
+
+        $targets = collect([$session]);
+
+        if ($moveSeries) {
+            $targets = $targets->concat(
+                $this->sessions->movableFromInSeries($session)
+                    ->reject(static fn (AfterHoursSession $later): bool => $later->is($session)),
+            );
+        }
+
+        DB::transaction(function () use ($targets, $shift, $duration, $reason, $moveSeries, $session, $startsAt, $endsAt): void {
+            foreach ($targets as $target) {
+                $from = $target->starts_at->toImmutable();
+                $newStart = $from->addSeconds($shift);
+
+                $this->sessions->update($target, [
+                    'starts_at' => $newStart->toDateTimeString(),
+                    'ends_at' => $newStart->addSeconds($duration)->toDateTimeString(),
+                    // Only the first move is remembered: moved twice, a session
+                    // still shows the time people originally planned around.
+                    'rescheduled_from' => $target->rescheduled_from?->toDateTimeString() ?? $from->toDateTimeString(),
+                    'reschedule_reason' => $reason,
+                ]);
+            }
+
+            if ($moveSeries) {
+                $this->series->update($session->loadMissing('series')->series, [
+                    'weekday' => $startsAt->dayOfWeekIso,
+                    'start_time' => $startsAt->format('H:i:s'),
+                    'end_time' => $endsAt->format('H:i:s'),
+                ]);
+            }
+        });
+
+        return $targets->count();
     }
 
     public function updateStatus(AfterHoursSession $session, SessionStatus $status): AfterHoursSession

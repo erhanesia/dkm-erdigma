@@ -15,6 +15,7 @@ use App\Http\Controllers\Web\Master\UserController;
 use App\Http\Controllers\Web\Mentoring\AttendanceController;
 use App\Http\Controllers\Web\Mentoring\MentoringGroupController;
 use App\Http\Controllers\Web\Mentoring\MyAfterHoursController;
+use App\Http\Controllers\Web\Mentoring\RescheduleController;
 use App\Http\Controllers\Web\Mentoring\SessionController;
 use App\Http\Controllers\Web\Monitoring\DeviceController;
 use App\Http\Controllers\Web\Monitoring\PlaybackLogController;
@@ -166,6 +167,10 @@ Route::middleware('auth')->prefix('panel')->group(function (): void {
                 ->name('sessions.qr');
             Route::post('kegiatan/{afterHoursSession}/qr', [SessionController::class, 'rotateQr'])
                 ->name('sessions.qr.rotate');
+            Route::get('kegiatan/{afterHoursSession}/jadwal-ulang', [RescheduleController::class, 'edit'])
+                ->name('sessions.reschedule.edit');
+            Route::put('kegiatan/{afterHoursSession}/jadwal-ulang', [RescheduleController::class, 'update'])
+                ->name('sessions.reschedule.update');
 
             Route::get('laporan/kehadiran', [ReportController::class, 'attendance'])->name('reports.attendance');
             Route::get('laporan/kehadiran/ekspor', [ReportController::class, 'exportAttendance'])

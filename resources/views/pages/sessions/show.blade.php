@@ -18,6 +18,12 @@
        wire:navigate class="btn btn-light">
                 <i class="bi bi-arrow-left me-1"></i> Kembali
             </a>
+            @if ($session->status === \App\Enums\SessionStatus::Scheduled)
+                <a href="{{ route('sessions.reschedule.edit', $session) }}"
+                   wire:navigate class="btn btn-light">
+                    <i class="bi bi-calendar2-week me-1"></i> Jadwal Ulang
+                </a>
+            @endif
             <a href="{{ route('sessions.qr', $session) }}"
        wire:navigate class="btn btn-light">
                 <i class="bi bi-qr-code me-1"></i> Kode QR
@@ -75,6 +81,35 @@
                             <span class="fw-medium text-truncate" style="font-size:.875rem;">{{ $rowValue }}</span>
                         </div>
                     @endforeach
+
+                    @if ($session->isRescheduled())
+                        <div class="d-flex align-items-start gap-3 py-2 border-bottom">
+                            <i class="bi bi-arrow-repeat text-warning"></i>
+                            <div style="font-size:.8125rem;">
+                                <div class="fw-medium">Dijadwal ulang</div>
+                                <div class="text-secondary">
+                                    Semula {{ DateHelper::formatLongDate($session->rescheduled_from) }},
+                                    {{ DateHelper::formatTime($session->rescheduled_from) }}
+                                    @if ($session->reschedule_reason)
+                                        &middot; {{ $session->reschedule_reason }}
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($session->series)
+                        <div class="d-flex align-items-start gap-3 py-2 border-bottom">
+                            <i class="bi bi-collection text-secondary"></i>
+                            <div style="font-size:.8125rem;">
+                                <div class="fw-medium">Kegiatan berulang</div>
+                                <div class="text-secondary">
+                                    {{ $session->series->describe() }}, sampai
+                                    {{ DateHelper::formatDate($session->series->ends_on) }}
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
                     @if ($session->description)
                         <div class="pt-3">

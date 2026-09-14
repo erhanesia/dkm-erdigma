@@ -185,6 +185,31 @@ class AfterHoursSessionRepository extends BaseRepository implements AfterHoursSe
             ->get();
     }
 
+    public function datesTakenByGroup(int $groupId, CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        return $this->query()
+            ->where('mentoring_group_id', $groupId)
+            ->where('status', '!=', SessionStatus::Cancelled->value)
+            ->whereBetween('starts_at', [$from->startOfDay()->toDateTimeString(), $to->endOfDay()->toDateTimeString()])
+            ->pluck('starts_at')
+            ->map(static fn ($startsAt): string => CarbonImmutable::parse((string) $startsAt)->toDateString())
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    public function movableFromInSeries(AfterHoursSession $session): Collection
+    {
+        return $this->query()
+            ->where('series_id', $session->series_id)
+            ->where('starts_at', '>=', $session->starts_at)
+            ->where('starts_at', '>', DateHelper::now())
+            ->where('status', SessionStatus::Scheduled->value)
+            ->whereDoesntHave('attendances', static fn (Builder $query) => $query->attending())
+            ->orderBy('starts_at')
+            ->get();
+    }
+
     public function countInMonth(CarbonImmutable $month): int
     {
         return $this->query()

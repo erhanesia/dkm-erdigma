@@ -39,9 +39,11 @@
                                   hint="Hanya orang yang ditandai sebagai mentor di halaman Pengguna."
                                   searchable required />
 
-                    <x-form.field name="default_location" label="Lokasi Rutin"
-                                  :value="$group?->default_location"
-                                  placeholder="Contoh: Musholla lantai 1" />
+                    <x-form.field name="default_location" label="Lokasi Rutin" type="select"
+                                  :value="$group?->default_location" :options="$locations"
+                                  placeholder="Cari atau ketik tempat baru…"
+                                  hint="Tempat yang belum ada di daftar akan tersimpan untuk dipakai lagi."
+                                  searchable creatable />
 
                     <x-form.field name="description" label="Keterangan"
                                   :value="$group?->description" />

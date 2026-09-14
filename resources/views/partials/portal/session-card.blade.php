@@ -26,6 +26,8 @@
         @endif
 
         <div class="landing-session-meta">
+            <x-rescheduled-badge :session="$session" />
+
             @if ($session->mentor)
                 <span>
                     <i class="bi bi-person-badge me-1"></i>
