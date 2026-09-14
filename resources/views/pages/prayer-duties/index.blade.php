@@ -9,11 +9,14 @@
 @section('content')
     <x-page-header
         title="Petugas Sholat"
-        subtitle="Giliran muadzin dan imam harian. Diisi satu minggu sekaligus.">
+        subtitle="Giliran imam dan muadzin Dzuhur dan Ashar, Senin sampai Jumat. Diisi satu minggu sekaligus.">
         <x-slot:actions>
-            <button type="button" class="btn btn-light" onclick="window.print()">
+            {{-- Opens the sheet on the week shown here; the sheet can widen it. --}}
+            <a href="{{ route('prayer-duties.print', ['from' => $weekStart->toDateString(), 'to' => $weekEnd->toDateString()]) }}"
+               wire:navigate
+               class="btn btn-light">
                 <i class="bi bi-printer me-1"></i> Cetak
-            </button>
+            </a>
         </x-slot:actions>
     </x-page-header>
 
@@ -57,7 +60,7 @@
                         <tr>
                             <th style="min-width:130px;">Hari</th>
                             @foreach ($prayers as $prayer)
-                                <th class="text-center" style="min-width:190px;">
+                                <th class="text-center" style="min-width:240px;">
                                     <span class="d-inline-flex align-items-center gap-1">
                                         <i class="bi bi-{{ $prayer->icon() }} text-{{ $prayer->color() }}"></i>
                                         {{ $prayer->label() }}
@@ -89,18 +92,31 @@
                                     @php $duty = $prayerRow[$prayer->value] ?? null; @endphp
 
                                     <td>
-                                        <select name="duties[{{ $date }}][{{ $prayer->value }}][muadzin_id]"
-                                                class="form-select form-select-sm"
-                                                data-searchable
-                                                data-placeholder="Muadzin…">
-                                            <option value="">— kosong —</option>
-                                            @foreach ($people as $personId => $personName)
-                                                <option value="{{ $personId }}"
-                                                        @selected($duty?->muadzin_id === $personId)>
-                                                    {{ $personName }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+                                        {{-- Both roles are posted together, so a row is only
+                                             removed once the imam and the muadzin are both empty. --}}
+                                        @foreach (['imam_id' => 'Imam', 'muadzin_id' => 'Muadzin'] as $field => $role)
+                                            <div @class(['mt-2' => ! $loop->first])>
+                                                <label for="duty-{{ $date }}-{{ $prayer->value }}-{{ $field }}"
+                                                       class="d-block text-body-tertiary mb-1"
+                                                       style="font-size:.6875rem;">
+                                                    {{ $role }}
+                                                </label>
+
+                                                <select id="duty-{{ $date }}-{{ $prayer->value }}-{{ $field }}"
+                                                        name="duties[{{ $date }}][{{ $prayer->value }}][{{ $field }}]"
+                                                        class="form-select form-select-sm"
+                                                        data-searchable
+                                                        data-placeholder="{{ $role }}…">
+                                                    <option value="">— kosong —</option>
+                                                    @foreach ($people as $personId => $personName)
+                                                        <option value="{{ $personId }}"
+                                                                @selected($duty?->{$field} === $personId)>
+                                                            {{ $personName }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        @endforeach
 
                                         @if ($schedule)
                                             <div class="text-body-tertiary text-center mt-1" style="font-size:.6875rem;">
@@ -123,7 +139,7 @@
         </div>
 
         <p class="form-hint mt-2 no-print">
-            Biarkan kosong kalau belum ada petugas — barisnya tidak akan disimpan.
+            Kosongkan imam dan muadzin kalau belum ada petugas — barisnya tidak akan disimpan.
         </p>
     </form>
 @endsection

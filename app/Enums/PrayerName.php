@@ -91,4 +91,21 @@ enum PrayerName: string implements HasLabel
             static fn (self $prayer): bool => $prayer->hasAdhan(),
         ));
     }
+
+    /**
+     * The prayers the officers' roster covers: Dzuhur and Ashar.
+     *
+     * Those are the two congregations that fall within the working day, and
+     * the only ones the board assigns an imam and a muadzin to.
+     *
+     * Deliberately separate from `withAdhan()`. That list still drives the
+     * adhan audio for all five prayers, and narrowing it would silence the
+     * players at Subuh, Maghrib and Isya.
+     *
+     * @return array<int, self>
+     */
+    public static function rostered(): array
+    {
+        return [self::Dhuhr, self::Asr];
+    }
 }

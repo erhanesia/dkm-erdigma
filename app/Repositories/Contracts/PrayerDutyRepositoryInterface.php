@@ -15,11 +15,15 @@ use Illuminate\Database\Eloquent\Collection;
 interface PrayerDutyRepositoryInterface extends RepositoryInterface
 {
     /**
+     * Rostered prayers only — see `PrayerName::rostered()`.
+     *
      * @return Collection<int, PrayerDuty>
      */
     public function between(CarbonImmutable $from, CarbonImmutable $to): Collection;
 
     /**
+     * Rostered prayers only — see `PrayerName::rostered()`.
+     *
      * @return Collection<int, PrayerDuty>
      */
     public function forDate(CarbonImmutable|string $date): Collection;
@@ -34,7 +38,8 @@ interface PrayerDutyRepositoryInterface extends RepositoryInterface
     public function saveGrid(array $grid, ?int $createdBy = null): void;
 
     /**
-     * Next duty for a specific person, used by "tugas saya".
+     * Next duty for a specific person, used by "tugas saya". Rostered prayers
+     * only, so the list matches what the roster can still assign.
      *
      * @return Collection<int, PrayerDuty>
      */

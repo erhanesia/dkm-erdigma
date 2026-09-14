@@ -204,12 +204,22 @@ class PrayerScheduleService
      */
     public function forMonth(CarbonImmutable $month): Collection
     {
-        $start = $month->startOfMonth();
-        $end = $month->endOfMonth();
+        return $this->forRange($month->startOfMonth(), $month->endOfMonth());
+    }
 
-        $this->generateRange($start, $end);
+    /**
+     * Every day in the window, generating any that are missing first.
+     *
+     * A week, or a printed roster, can start in one month and end in the next;
+     * reading it a month at a time left the days on the far side without times.
+     *
+     * @return Collection<int, PrayerSchedule>
+     */
+    public function forRange(CarbonImmutable $from, CarbonImmutable $to): Collection
+    {
+        $this->generateRange($from, $to);
 
-        return $this->schedules->between($start, $end);
+        return $this->schedules->between($from, $to);
     }
 
     /**

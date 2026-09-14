@@ -10,10 +10,12 @@ use App\Models\User;
 use App\Repositories\Contracts\PrayerDutyRepositoryInterface;
 use App\Support\Helpers\DateHelper;
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * The daily muezzin/imam roster, edited as a week-at-a-time grid.
+ * The Dzuhur and Ashar roster for the working week — imam and muadzin —
+ * edited a week at a time and printed for any range.
  */
 class PrayerDutyService
 {
@@ -22,29 +24,58 @@ class PrayerDutyService
     ) {}
 
     /**
-     * Week grid shaped for the Blade table: date => prayer => duty|null.
+     * The working week shaped for the Blade table: date => prayer => duty|null.
      *
      * @return array<string, array<string, PrayerDuty|null>>
      */
     public function weekGrid(CarbonImmutable $weekStart): array
     {
-        $weekEnd = $weekStart->addDays(6);
-        $duties = $this->duties->between($weekStart, $weekEnd);
+        return $this->gridBetween($weekStart, $weekStart->addDays(4));
+    }
+
+    /**
+     * The same shape for any window — the editor asks for a week, the printed
+     * roster for whatever range the board picks.
+     *
+     * Every rostered day in the window gets a row and every rostered prayer a
+     * column, filled or not, so a gap in the roster shows up as a gap on the
+     * sheet.
+     *
+     * @return array<string, array<string, PrayerDuty|null>>
+     */
+    public function gridBetween(CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        $duties = $this->duties->between($from, $to)->keyBy(
+            static fn (PrayerDuty $duty): string => DateHelper::toCarbon($duty->date)->toDateString().'|'.$duty->prayer->value,
+        );
 
         $grid = [];
 
-        for ($cursor = $weekStart; $cursor->lessThanOrEqualTo($weekEnd); $cursor = $cursor->addDay()) {
+        for ($cursor = $from->startOfDay(); $cursor->lessThanOrEqualTo($to); $cursor = $cursor->addDay()) {
+            if (! $this->isRosteredDay($cursor)) {
+                continue;
+            }
+
             $day = $cursor->toDateString();
 
-            foreach (PrayerName::withAdhan() as $prayer) {
-                $grid[$day][$prayer->value] = $duties->first(
-                    static fn (PrayerDuty $duty): bool => DateHelper::toCarbon($duty->date)->toDateString() === $day
-                        && $duty->prayer === $prayer,
-                );
+            foreach (PrayerName::rostered() as $prayer) {
+                $grid[$day][$prayer->value] = $duties->get($day.'|'.$prayer->value);
             }
         }
 
         return $grid;
+    }
+
+    /**
+     * Whether officers are assigned on this day: Monday to Friday.
+     *
+     * These are the office's congregations, and nobody is in on the weekend —
+     * Saturday is work-from-anywhere and Sunday a day off — so there is no one
+     * on site to lead either prayer or to call it.
+     */
+    public function isRosteredDay(CarbonInterface $date): bool
+    {
+        return $date->isWeekday();
     }
 
     /**

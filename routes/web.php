@@ -234,8 +234,10 @@ Route::middleware('auth')->prefix('panel')->group(function (): void {
             ->parameters(['jadwal-jumat' => 'fridaySchedule'])
             ->names('friday-schedules');
 
-        // Roster muadzin harian
+        // Petugas sholat Dzuhur & Ashar — imam dan muadzin
         Route::get('petugas-sholat', [PrayerDutyController::class, 'index'])->name('prayer-duties.index');
+        Route::get('petugas-sholat/cetak', [PrayerDutyController::class, 'print'])->name('prayer-duties.print');
+        Route::get('petugas-sholat/cetak/pdf', [PrayerDutyController::class, 'pdf'])->name('prayer-duties.pdf');
         Route::put('petugas-sholat', [PrayerDutyController::class, 'update'])->name('prayer-duties.update');
 
         // Pengguna

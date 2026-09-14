@@ -30,6 +30,7 @@ class PrayerDutyRepository extends BaseRepository implements PrayerDutyRepositor
     {
         return $this->query()
             ->with(['muadzin', 'imam'])
+            ->rostered()
             ->between($from, $to)
             ->orderBy('date')
             ->get();
@@ -39,6 +40,7 @@ class PrayerDutyRepository extends BaseRepository implements PrayerDutyRepositor
     {
         return $this->query()
             ->with(['muadzin', 'imam'])
+            ->rostered()
             ->whereDate('date', DateHelper::toCarbon($date)->toDateString())
             ->get();
     }
@@ -82,6 +84,7 @@ class PrayerDutyRepository extends BaseRepository implements PrayerDutyRepositor
     public function upcomingForUser(int $userId, int $limit = 5): Collection
     {
         return $this->query()
+            ->rostered()
             ->whereDate('date', '>=', DateHelper::today()->toDateString())
             ->where(function (Builder $query) use ($userId): void {
                 $query->where('muadzin_id', $userId)->orWhere('imam_id', $userId);
