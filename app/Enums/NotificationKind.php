@@ -29,6 +29,14 @@ enum NotificationKind: string implements HasLabel
         };
     }
 
+    public function color(): string
+    {
+        return match ($this) {
+            self::PrayerReminder => 'info',
+            self::FridayReminder => 'primary',
+        };
+    }
+
     public function icon(): string
     {
         return match ($this) {

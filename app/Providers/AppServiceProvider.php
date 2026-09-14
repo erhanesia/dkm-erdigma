@@ -9,6 +9,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -33,6 +34,20 @@ class AppServiceProvider extends ServiceProvider
         $this->configureUrls();
         $this->configureRateLimiters();
         $this->configureViews();
+        $this->configurePagination();
+    }
+
+    /**
+     * Pagination links drawn in Bootstrap's markup.
+     *
+     * Laravel's default pagination view is written in Tailwind classes, which
+     * this app does not load — so its previous/next chevrons, sized only by a
+     * Tailwind `w-5 h-5`, rendered as SVGs stretched to the full width of the
+     * table card.
+     */
+    private function configurePagination(): void
+    {
+        Paginator::useBootstrapFive();
     }
 
     /**

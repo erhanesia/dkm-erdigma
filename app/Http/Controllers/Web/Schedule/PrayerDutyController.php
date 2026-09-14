@@ -7,11 +7,8 @@ namespace App\Http\Controllers\Web\Schedule;
 use App\Enums\DutyStatus;
 use App\Enums\PrayerName;
 use App\Http\Controllers\Controller;
-use App\Models\PrayerDuty;
-use App\Models\PrayerSchedule;
 use App\Models\User;
 use App\Services\Friday\PrayerDutyService;
-use App\Services\Prayer\PrayerScheduleService;
 use App\Services\SettingService;
 use App\Services\User\UserService;
 use App\Support\Helpers\DateHelper;
@@ -19,7 +16,6 @@ use App\Support\Helpers\Flash;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,18 +28,8 @@ use Illuminate\View\View;
  */
 class PrayerDutyController extends Controller
 {
-    /**
-     * The longest range one printout may cover.
-     *
-     * Two months is more than a noticeboard ever holds. The bound matters
-     * because reading a range also generates any prayer times missing from it,
-     * and an open-ended range would let one request write years of them.
-     */
-    private const MAX_PRINT_DAYS = 62;
-
     public function __construct(
         private readonly PrayerDutyService $duties,
-        private readonly PrayerScheduleService $prayerSchedules,
         private readonly UserService $users,
     ) {}
 
@@ -57,7 +43,7 @@ class PrayerDutyController extends Controller
             'weekStart' => $weekStart,
             'weekEnd' => $weekEnd,
             'grid' => $this->duties->weekGrid($weekStart),
-            'prayerTimes' => $this->prayerTimesBetween($weekStart, $weekEnd),
+            'prayerTimes' => $this->duties->prayerTimesBetween($weekStart, $weekEnd),
             'prayers' => PrayerName::rostered(),
             'people' => $this->users->dutyCandidateOptions(),
             'statuses' => DutyStatus::options(),
@@ -65,19 +51,16 @@ class PrayerDutyController extends Controller
     }
 
     /**
-     * The printout's preview: the range form, and the sheet as it will print.
+     * The printout's preview.
      *
-     * With no range given it is the current week. The editor's print button
-     * passes the week it is showing, so the sheet opens on what was on screen.
+     * The range form and the sheet belong to `App\Livewire\PrayerDutyPrintPreview`,
+     * which redraws the sheet in place when a new range is applied rather than
+     * reloading the page. With no range given it is the current week; the
+     * editor's print button passes the week it is showing.
      */
-    public function print(Request $request): View
+    public function print(): View
     {
-        [$from, $to] = $this->resolvePrintPeriod($request);
-
-        return view('pages.prayer-duties.print', [
-            ...$this->sheet($from, $to),
-            'maxDays' => self::MAX_PRINT_DAYS,
-        ]);
+        return view('pages.prayer-duties.print');
     }
 
     /**
@@ -90,13 +73,17 @@ class PrayerDutyController extends Controller
      *
      * Only the glyphs the sheet uses are embedded. The whole of DejaVu Sans put
      * a month's roster near a megabyte; subset, it is a few dozen kilobytes.
+     *
+     * @throws ValidationException
      */
     public function pdf(Request $request, SettingService $settings): Response
     {
-        [$from, $to] = $this->resolvePrintPeriod($request);
+        [$from, $to] = $this->duties->printPeriod($request->only(['from', 'to']));
 
         return Pdf::loadView('pages.prayer-duties.pdf', [
-            ...$this->sheet($from, $to),
+            ...$this->duties->printSheet($from, $to),
+            'from' => $from,
+            'to' => $to,
             'mosqueName' => $settings->mosqueName(),
             'printedAt' => DateHelper::now(),
         ])
@@ -136,79 +123,6 @@ class PrayerDutyController extends Controller
             : DateHelper::today();
 
         return $reference->startOfWeek(CarbonInterface::MONDAY);
-    }
-
-    /**
-     * Each end defaults to the current working week's, Monday to Friday, and a
-     * range typed in backwards is turned around rather than refused — the same
-     * leniency as the attendance report's period.
-     *
-     * @return array{0: CarbonImmutable, 1: CarbonImmutable}
-     *
-     * @throws ValidationException
-     */
-    private function resolvePrintPeriod(Request $request): array
-    {
-        $request->validate([
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
-        ], [
-            'from.date' => 'Dari tanggal harus berupa tanggal yang valid.',
-            'to.date' => 'Sampai tanggal harus berupa tanggal yang valid.',
-        ]);
-
-        $weekStart = DateHelper::today()->startOfWeek(CarbonInterface::MONDAY);
-
-        $from = $request->filled('from')
-            ? DateHelper::toCarbon($request->string('from')->toString())->startOfDay()
-            : $weekStart;
-
-        $to = $request->filled('to')
-            ? DateHelper::toCarbon($request->string('to')->toString())->startOfDay()
-            : $weekStart->addDays(4);
-
-        if ($to->lessThan($from)) {
-            [$from, $to] = [$to, $from];
-        }
-
-        if ((int) $from->diffInDays($to) + 1 > self::MAX_PRINT_DAYS) {
-            throw ValidationException::withMessages([
-                'to' => 'Rentang cetak paling panjang '.self::MAX_PRINT_DAYS.' hari.',
-            ]);
-        }
-
-        return [$from, $to];
-    }
-
-    /**
-     * What the preview and the PDF both draw, so the two cannot disagree.
-     *
-     * @return array{from: CarbonImmutable, to: CarbonImmutable, grid: array<string, array<string, PrayerDuty|null>>, prayerTimes: Collection<string, PrayerSchedule>, prayers: array<int, PrayerName>}
-     */
-    private function sheet(CarbonImmutable $from, CarbonImmutable $to): array
-    {
-        return [
-            'from' => $from,
-            'to' => $to,
-            'grid' => $this->duties->gridBetween($from, $to),
-            'prayerTimes' => $this->prayerTimesBetween($from, $to),
-            'prayers' => PrayerName::rostered(),
-        ];
-    }
-
-    /**
-     * Prayer times for the window, keyed by `Y-m-d`.
-     *
-     * Read by range rather than by month: a week that starts in one month and
-     * ends in the next used to lose the times for its last few days.
-     *
-     * @return Collection<string, PrayerSchedule>
-     */
-    private function prayerTimesBetween(CarbonImmutable $from, CarbonImmutable $to): Collection
-    {
-        return $this->prayerSchedules
-            ->forRange($from, $to)
-            ->keyBy(static fn (PrayerSchedule $schedule): string => DateHelper::toCarbon($schedule->date)->toDateString());
     }
 
     /**

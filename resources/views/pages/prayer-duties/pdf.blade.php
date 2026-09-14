@@ -106,18 +106,33 @@
             background: #fafaf9;
         }
 
-        .duty-sheet__day {
-            font-weight: bold;
-        }
-
-        .duty-sheet__date,
-        .duty-sheet__time {
+        /*
+         * Column widths, stated on the header cells so dompdf lays every row
+         * out from them.
+         *
+         * The date and the times only ever hold short text of a known length,
+         * so they get what that text needs and the four name columns share
+         * everything else: 19 + 2 × (6 + 17.25 + 17.25) = 100.
+         */
+        .duty-sheet__date {
+            width: 19%;
             white-space: nowrap;
         }
 
         .duty-sheet__time {
+            width: 6%;
+            white-space: nowrap;
             font-weight: bold;
             text-align: center;
+        }
+
+        .duty-sheet__name {
+            width: 17.25%;
+        }
+
+        /* The names are what is looked for on the board, so they read a size up. */
+        .duty-sheet__table tbody td.duty-sheet__name {
+            font-size: 9.5pt;
         }
 
         .duty-sheet__empty {

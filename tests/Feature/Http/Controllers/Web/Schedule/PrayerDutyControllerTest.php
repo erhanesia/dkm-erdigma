@@ -265,24 +265,25 @@ class PrayerDutyControllerTest extends TestCase
             ->assertSeeInOrder(['1 September 2026', '30 Oktober 2026']);
     }
 
-    public function test_print_rejects_a_range_longer_than_62_days(): void
+    public function test_print_link_with_a_range_longer_than_62_days_opens_the_current_week_and_says_why(): void
     {
         $response = $this->actingAs($this->boardMember())
-            ->from(route('prayer-duties.print'))
             ->get(route('prayer-duties.print', ['from' => '2026-09-01', 'to' => '2026-11-02']));
 
-        $response->assertRedirect(route('prayer-duties.print'))
-            ->assertSessionHasErrors(['to' => 'Rentang cetak paling panjang 62 hari.']);
+        $response->assertOk()
+            ->assertSee('Rentang cetak paling panjang 62 hari.')
+            ->assertSeeInOrder(['Senin, 14 September 2026', "Jum'at, 18 September 2026"])
+            ->assertDontSee('1 September 2026');
     }
 
-    public function test_print_rejects_a_start_date_that_is_not_a_date(): void
+    public function test_print_link_with_a_start_date_that_is_not_a_date_opens_the_current_week_and_says_why(): void
     {
         $response = $this->actingAs($this->boardMember())
-            ->from(route('prayer-duties.print'))
             ->get(route('prayer-duties.print', ['from' => 'bukan-tanggal']));
 
-        $response->assertRedirect(route('prayer-duties.print'))
-            ->assertSessionHasErrors(['from' => 'Dari tanggal harus berupa tanggal yang valid.']);
+        $response->assertOk()
+            ->assertSee('Dari tanggal harus berupa tanggal yang valid.')
+            ->assertSeeInOrder(['Senin, 14 September 2026', "Jum'at, 18 September 2026"]);
     }
 
     public function test_sheet_says_so_when_the_range_holds_no_working_day(): void

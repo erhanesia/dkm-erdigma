@@ -81,6 +81,33 @@ a {
 }
 
 /*
+ * A single select with someone already picked.
+ *
+ * Tom Select hides its search input only once the field loses focus, and that
+ * input carries `min-width: 7rem`. Picking an option leaves the field focused,
+ * so the control grew by 7rem the moment a choice was made — widening its whole
+ * column on the duty roster — and shrank back as soon as the next select was
+ * clicked. The input takes only the room left beside the item instead, and a
+ * long name ends in an ellipsis rather than pushing the field wider.
+ */
+.ts-wrapper.single.has-items .ts-control {
+    flex-wrap: nowrap;
+
+    > .item {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    > input {
+        flex: 1 1 0;
+        width: 0;
+        min-width: 0;
+    }
+}
+
+/*
  * Tom Select's own stylesheet is imported from app.js, so Vite emits it as a
  * separate file whose order relative to this one is not guaranteed. Anything
  * the dropdown needs to be legible is therefore stated here rather than
