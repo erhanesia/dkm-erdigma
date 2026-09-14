@@ -154,6 +154,29 @@
     }
 }
 
+/*
+ * The page behind the open menu.
+ *
+ * Blurred rather than only dimmed, so the hero's white type and the page's
+ * cards stop competing with the links in the panel.
+ *
+ * Bootstrap fades the backdrop to half opacity, and opacity applies to a
+ * backdrop-filter's result too — a half-strength blur reads as a double image
+ * rather than frosted glass. So the element is shown at full opacity and the
+ * dimming lives in its colour instead; the fade still runs, from 0 to 1.
+ *
+ * The navigation sits at `$zindex-sticky`, under the backdrop, so the logo and
+ * the hamburger blur along with everything else.
+ */
+.landing .offcanvas-backdrop {
+    background-color: rgba($brand-950, 0.4);
+    backdrop-filter: blur(8px);
+
+    &.show {
+        opacity: 1;
+    }
+}
+
 .landing-menu-title {
     margin: 0;
     font-size: 0.72rem;

@@ -75,8 +75,8 @@
                 side read as one control that had been cut in half.
             --}}
             @auth
-                <a href="{{ route('dashboard') }}" class="btn btn-primary btn-sm px-3 d-none d-xl-inline-block">
-                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                <a href="{{ route('dashboard') }}" class="btn landing-nav-glass-btn d-none d-xl-inline-block">
+                    <i class="bi bi-layout-sidebar-inset me-1"></i> Dashboard
                 </a>
             @else
                 <a href="{{ route('login') }}" class="btn btn-primary btn-sm px-3 d-none d-xl-inline-block">
@@ -142,7 +142,7 @@
         {{-- The one action on this menu that is not navigation. --}}
         @auth
             <a href="{{ route('dashboard') }}" class="landing-menu-action">
-                <i class="bi bi-speedometer2"></i> Buka Dashboard
+                <i class="bi bi-layout-sidebar-inset"></i> Buka Dashboard
             </a>
         @else
             <a href="{{ route('login') }}" class="landing-menu-action">
@@ -170,7 +170,7 @@
 
         @auth
             <a href="{{ route('dashboard') }}" class="btn btn-light btn-lg px-4 mt-2">
-                <i class="bi bi-speedometer2 me-2"></i> Buka Dashboard
+                <i class="bi bi-layout-sidebar-inset me-2"></i> Buka Dashboard
             </a>
         @else
             <a href="{{ route('login') }}" class="btn btn-light btn-lg px-4 mt-2">

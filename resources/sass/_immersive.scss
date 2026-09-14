@@ -581,7 +581,8 @@
      * second pill only reads as a stray panel behind the mark.
      */
     .landing-nav-links,
-    .landing-nav-mobile-pill {
+    .landing-nav-mobile-pill,
+    .landing-nav-glass-btn {
         background: rgba($white, 0.18);
         border: 1px solid rgba($white, 0.32);
         border-radius: $border-radius-pill;
@@ -591,9 +592,43 @@
 
     .landing-nav.is-grounded {
         .landing-nav-links,
-        .landing-nav-mobile-pill {
+        .landing-nav-mobile-pill,
+        .landing-nav-glass-btn {
             background: rgba($brand-950, 0.86);
             border-color: rgba($white, 0.12);
+        }
+    }
+
+    /*
+     * The way back into the dashboard, for someone already signed in.
+     *
+     * Made of the same glass as the links beside it rather than the white
+     * sign-in pill: a returning member is not being asked to do anything, so
+     * the button joins the navigation instead of calling out from the end of it.
+     * Its padding matches the links pill's outer height, so the two sit as a
+     * pair of equal controls rather than a tall pill next to a short one.
+     */
+    .landing-nav-glass-btn {
+        padding: 0.7rem 1.1rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        line-height: 1.5;
+        color: $white;
+        white-space: nowrap;
+
+        &:hover,
+        &:focus-visible {
+            color: $white;
+            background: rgba($white, 0.28);
+            border-color: rgba($white, 0.42);
+        }
+    }
+
+    .landing-nav.is-grounded .landing-nav-glass-btn {
+        &:hover,
+        &:focus-visible {
+            background: rgba($brand-800, 0.92);
+            border-color: rgba($white, 0.2);
         }
     }
 
