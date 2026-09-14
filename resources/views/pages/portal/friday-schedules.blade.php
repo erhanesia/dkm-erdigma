@@ -58,25 +58,16 @@
     <section class="landing-section">
         <div class="container">
             <div class="text-center mb-5" data-aos>
-                <h2 class="landing-heading">Pekan Mendatang</h2>
+                <h2 class="landing-heading">Jadwal Khutbah Jumat</h2>
                 <p class="landing-sub">
-                    {{ $schedules->count() }} jadwal telah diumumkan.
+                    Satu bulan penuh sekaligus — telusuri bulan lalu, bulan
+                    berikutnya, atau pilih sendiri bulan dan tahunnya.
                 </p>
             </div>
 
-            @forelse ($schedules as $index => $friday)
-                <div data-aos data-aos-delay="{{ min(($index + 1) * 60, 300) }}">
-                    @include('partials.portal.friday-card', [
-                        'friday' => $friday,
-                        'isFeatured' => $loop->first,
-                    ])
-                </div>
-            @empty
-                <div class="landing-empty" data-aos>
-                    <i class="bi bi-calendar-x"></i>
-                    <p class="mb-0">Belum ada jadwal khutbah yang diumumkan.</p>
-                </div>
-            @endforelse
+            {{-- The month picker and the cards: the only part of this page that
+                 changes when a visitor looks at another month. --}}
+            <livewire:public-friday-month />
         </div>
     </section>
 

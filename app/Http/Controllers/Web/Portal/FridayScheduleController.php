@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Web\Portal;
 use App\Http\Controllers\Controller;
 use App\Services\Friday\FridayScheduleService;
 use App\Services\Prayer\PrayerScheduleService;
-use App\Support\Helpers\DateHelper;
 use Illuminate\View\View;
 
 /**
@@ -29,15 +28,19 @@ class FridayScheduleController extends Controller
 
     public function index(): View
     {
-        $upcoming = $this->fridaySchedules->upcoming(self::UPCOMING_LIMIT);
-
         return view('pages.portal.friday-schedules', [
-            'schedules' => $upcoming,
-            'next' => $upcoming->first(),
+            /*
+             * Only the part of the page that is about *this* mosque.
+             *
+             * The month picker and the roster itself belong to
+             * `App\Livewire\PublicFridayMonth`, which replaces itself rather
+             * than the page when a visitor steps to another month.
+             */
+            'next' => $this->fridaySchedules->nextUpcoming(),
+
             // The Friday sermon starts around Dhuhr, so the time people actually
             // need alongside the roster is today's Dhuhr.
             'todaySchedule' => $this->prayerSchedules->today(),
-            'serverTime' => DateHelper::now(),
         ]);
     }
 
