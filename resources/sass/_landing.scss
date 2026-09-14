@@ -495,11 +495,6 @@
         box-shadow: $box-shadow-sm;
     }
 
-    &.is-featured {
-        border-color: $brand-300;
-        box-shadow: 0 12px 28px -20px rgba($brand-900, 0.55);
-    }
-
     @include media-breakpoint-down(md) {
         flex-wrap: wrap;
         gap: 0.85rem;
@@ -645,6 +640,77 @@
     font-weight: 600;
     font-variant-numeric: tabular-nums;
     color: $neutral-600;
+}
+
+/*
+ * The coming Friday.
+ *
+ * Lifted out of the row the same way the next prayer is — a dark card rather
+ * than a tint — and its date and flag sit on the glass of the hero's next-prayer
+ * panel, so the two "what's next" cards on the page read as one idea.
+ *
+ * Written after `.is-grid` and the element rules on purpose: the overrides below
+ * share their specificity and win on source order.
+ */
+.landing-friday.is-featured {
+    background: linear-gradient(180deg, $brand-800 0%, $brand-950 100%);
+    border-color: $brand-800;
+    box-shadow: 0 16px 32px -18px rgba($brand-900, 0.7);
+
+    .landing-friday-date {
+        background: rgba($white, 0.1);
+        border: 1px solid rgba($white, 0.18);
+        backdrop-filter: blur(10px);
+    }
+
+    .landing-friday-day {
+        color: $white;
+    }
+
+    .landing-friday-month {
+        color: $brand-200;
+    }
+
+    .landing-friday-theme {
+        color: $white;
+    }
+
+    .landing-friday-people {
+        color: rgba($white, 0.72);
+
+        strong {
+            color: rgba($white, 0.9);
+        }
+    }
+
+    .landing-friday-time {
+        color: $white;
+        border-top-color: rgba($white, 0.16);
+    }
+
+    .landing-chevron {
+        color: $brand-200;
+    }
+
+    &:hover .landing-chevron {
+        color: $white;
+    }
+}
+
+// Small caps on glass, the same voice as `.landing-eyebrow` in the hero.
+.landing-friday-flag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $brand-100;
+    background: rgba($white, 0.12);
+    border: 1px solid rgba($white, 0.18);
+    border-radius: $border-radius-pill;
+    backdrop-filter: blur(8px);
 }
 
 .landing-empty {

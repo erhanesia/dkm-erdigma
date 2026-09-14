@@ -22,7 +22,7 @@
 
     <div class="flex-grow-1 min-w-0">
         @if ($isFeatured)
-            <span class="badge text-bg-primary mb-2">Jumat terdekat</span>
+            <span class="landing-friday-flag mb-2">Jumat terdekat</span>
         @endif
 
         <div class="landing-friday-theme">
