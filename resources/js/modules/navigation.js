@@ -55,6 +55,48 @@ export function syncActiveNavLink() {
 }
 
 /**
+ * Carries the month being read from one schedule page to the other.
+ *
+ * The public prayer and Friday pages both keep their month in `?bulan=`, and
+ * their links are marked `data-carry-month`. `#[Url(keep: true)]` does not do
+ * this on its own — it only keeps the parameter in the address bar of the page
+ * it is on — and the server-rendered links cannot know the month either, because
+ * it changes after the page has loaded, as the visitor browses. So the month is
+ * copied onto the link from the current address as the link is about to be used.
+ *
+ * Hover, press and keyboard focus each come before `wire:navigate` reads the
+ * `href` — it prefetches 60ms after the pointer enters, and navigates on click —
+ * and they are listened for in the capture phase on `document`, ahead of the
+ * link's own listeners. Bound once: `document` survives the body swap.
+ */
+export function bindMonthCarry() {
+    const carry = (event) => {
+        const link = event.target instanceof Element ? event.target.closest('a[data-carry-month]') : null;
+
+        if (!link) {
+            return;
+        }
+
+        const month = new URLSearchParams(window.location.search).get('bulan');
+        const destination = new URL(link.getAttribute('href'), window.location.origin);
+
+        if (month) {
+            destination.searchParams.set('bulan', month);
+        } else {
+            destination.searchParams.delete('bulan');
+        }
+
+        if (link.href !== destination.href) {
+            link.setAttribute('href', destination.href);
+        }
+    };
+
+    ['mouseover', 'pointerdown', 'focusin'].forEach((type) => {
+        document.addEventListener(type, carry, { capture: true, passive: true });
+    });
+}
+
+/**
  * Dims the outgoing page while the next one is being fetched, and closes the
  * mobile drawer so the new page is not hidden behind it.
  */

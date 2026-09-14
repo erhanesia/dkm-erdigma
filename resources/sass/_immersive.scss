@@ -565,29 +565,70 @@
     /*
      * The grounds the links sit on.
      *
-     * Over the hero they are barely-there glass. Once the page beneath them is
-     * light they darken, because the links are white — this is the one thing
-     * that has to change, and it changes on 40px of pill rather than on the
-     * whole window.
+     * At rest — nothing behind them but the hero's own ground — they are glass:
+     * enough of a shade to be a control, little enough to keep the hero whole.
+     *
+     * They darken the moment the page moves, not when the hero finally clears.
+     * The links are white and so is half the hero's type, and glass this light
+     * with a white heading sliding behind it stops being a surface at all: the
+     * labels and the heading merge into each other. `is-grounded` engages on
+     * the first few pixels of scroll, which is exactly when something starts
+     * passing underneath — and it changes on 40px of pill rather than on the
+     * whole window, so it reads as the control adapting, not a panel arriving.
      *
      * The logo is deliberately not among them. `brand-logo--on-dark` already
      * puts the wordmark on a light chip of its own, and wrapping that in a
      * second pill only reads as a stray panel behind the mark.
      */
     .landing-nav-links,
-    .landing-nav-mobile-pill {
-        background: rgba($white, 0.14);
-        border: 1px solid rgba($white, 0.26);
+    .landing-nav-mobile-pill,
+    .landing-nav-glass-btn {
+        background: rgba($white, 0.18);
+        border: 1px solid rgba($white, 0.32);
         border-radius: $border-radius-pill;
         backdrop-filter: blur(12px);
         transition: background-color 400ms $ease-out, border-color 400ms $ease-out;
     }
 
-    .landing-nav.is-scrolled {
+    .landing-nav.is-grounded {
         .landing-nav-links,
-        .landing-nav-mobile-pill {
+        .landing-nav-mobile-pill,
+        .landing-nav-glass-btn {
             background: rgba($brand-950, 0.86);
             border-color: rgba($white, 0.12);
+        }
+    }
+
+    /*
+     * The way back into the dashboard, for someone already signed in.
+     *
+     * Made of the same glass as the links beside it rather than the white
+     * sign-in pill: a returning member is not being asked to do anything, so
+     * the button joins the navigation instead of calling out from the end of it.
+     * Its padding matches the links pill's outer height, so the two sit as a
+     * pair of equal controls rather than a tall pill next to a short one.
+     */
+    .landing-nav-glass-btn {
+        padding: 0.7rem 1.1rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        line-height: 1.5;
+        color: $white;
+        white-space: nowrap;
+
+        &:hover,
+        &:focus-visible {
+            color: $white;
+            background: rgba($white, 0.28);
+            border-color: rgba($white, 0.42);
+        }
+    }
+
+    .landing-nav.is-grounded .landing-nav-glass-btn {
+        &:hover,
+        &:focus-visible {
+            background: rgba($brand-800, 0.92);
+            border-color: rgba($white, 0.2);
         }
     }
 
@@ -643,8 +684,9 @@
     /*
      * The hamburger.
      *
-     * Same glass as the pill beside it, and the same darkening once the page
-     * behind it is light.
+     * Same glass as the pill beside it, and it takes its ground at the same
+     * moment — a white bars icon over a passing white heading disappears the
+     * same way a white label does.
      */
     .landing-nav-toggle {
         display: grid;
@@ -653,14 +695,14 @@
         height: 38px;
         font-size: 1.15rem;
         color: $white;
-        background: rgba($white, 0.14);
-        border: 1px solid rgba($white, 0.26);
+        background: rgba($white, 0.18);
+        border: 1px solid rgba($white, 0.32);
         border-radius: 50%;
         backdrop-filter: blur(12px);
         transition: background-color 400ms $ease-out, border-color 400ms $ease-out;
     }
 
-    .landing-nav.is-scrolled .landing-nav-toggle {
+    .landing-nav.is-grounded .landing-nav-toggle {
         background: rgba($brand-950, 0.86);
         border-color: rgba($white, 0.12);
     }

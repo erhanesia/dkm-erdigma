@@ -185,15 +185,28 @@ function bindNav(section) {
     }
 
     /*
-     * The bar changes exactly when the hero's bottom edge passes under it, not
-     * at some fraction of the way down.
+     * Two states, because the pills and the scrim answer different questions.
      *
-     * A fraction was close enough on the front page, whose hero is a whole
-     * screen tall. On the short heroes of the inner pages 60% lands while the
-     * dark ground is still behind the links, so the pills darkened and the
-     * scrim washed white over a green hero for the next hundred pixels.
+     * `is-grounded` is about the pills. The links are white, and the moment the
+     * page moves the hero's own white type — the title, the big prayer time —
+     * starts sliding behind them. White on barely-there glass over a white
+     * heading is not a link any more, so the pills take a ground as soon as
+     * anything at all is passing underneath, while the hero is still green.
+     *
+     * `is-scrolled` is about the scrim, which washes that strip white. That
+     * only makes sense once the light page has actually arrived, and it changes
+     * exactly when the hero's bottom edge passes under the bar rather than at
+     * some fraction of the way down: a fraction was close enough on the front
+     * page, whose hero is a whole screen tall, but on the short heroes of the
+     * inner pages 60% lands while the dark ground is still behind the links,
+     * washing white over a green hero for the next hundred pixels.
+     *
+     * The threshold is a few pixels rather than zero so a momentum bounce at
+     * the top of the page does not flicker the pills.
      */
     const onScroll = () => {
+        nav.classList.toggle('is-grounded', window.scrollY > 8);
+
         nav.classList.toggle(
             'is-scrolled',
             section.getBoundingClientRect().bottom <= nav.offsetHeight,
