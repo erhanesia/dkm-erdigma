@@ -102,9 +102,13 @@
 
                                 <td class="text-nowrap" style="font-size:.875rem;">
                                     {{ DateHelper::formatDate($session->starts_at) }}
+                                    @if ($session->series_id)
+                                        <i class="bi bi-collection text-body-tertiary ms-1" title="Bagian dari kegiatan berulang"></i>
+                                    @endif
                                     <div class="text-body-tertiary" style="font-size:.75rem;">
                                         {{ DateHelper::formatTime($session->starts_at) }}–{{ DateHelper::formatTime($session->ends_at) }}
                                     </div>
+                                    <x-rescheduled-badge :session="$session" class="mt-1" />
                                 </td>
 
                                 <td class="text-center" style="min-width:130px;">

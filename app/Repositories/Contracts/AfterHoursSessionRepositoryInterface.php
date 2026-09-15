@@ -80,4 +80,20 @@ interface AfterHoursSessionRepositoryInterface extends RepositoryInterface
     public function endedButOpen(): Collection;
 
     public function countInMonth(CarbonImmutable $month): int;
+
+    /**
+     * Calendar dates in the window on which this halaqah already meets.
+     * Cancelled sessions leave their date free.
+     *
+     * @return array<int, string> `Y-m-d`
+     */
+    public function datesTakenByGroup(int $groupId, CarbonImmutable $from, CarbonImmutable $to): array;
+
+    /**
+     * Later sessions in the same series that can still move: scheduled, not
+     * yet started, and with nobody marked present.
+     *
+     * @return Collection<int, AfterHoursSession>
+     */
+    public function movableFromInSeries(AfterHoursSession $session): Collection;
 }

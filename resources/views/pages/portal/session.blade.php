@@ -46,6 +46,7 @@
                                 <span class="d-block text-body-tertiary" style="font-size:.8125rem;">
                                     {{ $session->starts_at->diffInMinutes($session->ends_at) }} menit
                                 </span>
+                                <x-rescheduled-badge :session="$session" class="mt-1" />
                             </dd>
 
                             @if ($session->mentor)

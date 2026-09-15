@@ -7,14 +7,20 @@ namespace App\Http\Controllers\Web\Mentoring;
 use App\Enums\SessionStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Session\StoreSessionRequest;
+use App\Http\Requests\Session\UpdateSessionRequest;
 use App\Models\AfterHoursSession;
 use App\Models\User;
 use App\Services\AfterHours\AfterHoursSessionService;
 use App\Services\AfterHours\AttendanceService;
+use App\Services\AfterHours\LocationService;
 use App\Services\AfterHours\MentoringGroupService;
+use App\Services\AfterHours\SessionSeriesService;
+use App\Support\Helpers\DateHelper;
 use App\Support\Helpers\Flash;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -27,6 +33,8 @@ class SessionController extends Controller
         private readonly AfterHoursSessionService $sessions,
         private readonly MentoringGroupService $groups,
         private readonly AttendanceService $attendances,
+        private readonly SessionSeriesService $series,
+        private readonly LocationService $locations,
     ) {}
 
     public function index(Request $request): View
@@ -49,6 +57,8 @@ class SessionController extends Controller
         return view('pages.sessions.create', [
             'groups' => $this->groups->options($user->isAdministrator() ? null : $user),
             'statuses' => SessionStatus::options(),
+            'locations' => $this->locations->options(),
+            'maxRecurrenceMonths' => SessionSeriesService::MAX_MONTHS,
         ]);
     }
 
@@ -57,7 +67,11 @@ class SessionController extends Controller
         /** @var User $actor */
         $actor = $request->user();
 
-        $session = $this->sessions->create($request->validated(), $actor);
+        if ($request->isRecurring()) {
+            return $this->storeSeries($request, $actor);
+        }
+
+        $session = $this->sessions->create($request->sessionAttributes(), $actor);
 
         Flash::success('Kegiatan "'.$session->topic.'" berhasil dijadwalkan. '
             .'Daftar hadir sudah disiapkan untuk semua anggota halaqah.');
@@ -69,7 +83,7 @@ class SessionController extends Controller
     {
         $this->authorizeAccess($request, $afterHoursSession);
 
-        $afterHoursSession->load(['group.mentor', 'mentor']);
+        $afterHoursSession->load(['group.mentor', 'mentor', 'series']);
 
         return view('pages.sessions.show', [
             'session' => $afterHoursSession,
@@ -90,10 +104,11 @@ class SessionController extends Controller
             'session' => $afterHoursSession,
             'groups' => $this->groups->options($user->isAdministrator() ? null : $user),
             'statuses' => SessionStatus::options(),
+            'locations' => $this->locations->options($afterHoursSession->location),
         ]);
     }
 
-    public function update(StoreSessionRequest $request, AfterHoursSession $afterHoursSession): RedirectResponse
+    public function update(UpdateSessionRequest $request, AfterHoursSession $afterHoursSession): RedirectResponse
     {
         $this->authorizeAccess($request, $afterHoursSession);
 
@@ -142,6 +157,32 @@ class SessionController extends Controller
         Flash::success('Kode QR diperbarui. Kode lama sudah tidak berlaku.');
 
         return redirect()->route('sessions.qr', $afterHoursSession);
+    }
+
+    /**
+     * Every meeting of a standing appointment, created in one go — then the
+     * first of them, which is the one the mentor is likeliest to open next.
+     */
+    private function storeSeries(StoreSessionRequest $request, User $actor): RedirectResponse
+    {
+        $result = $this->series->schedule(
+            $request->sessionAttributes(),
+            (int) $request->validated('repeat_every_weeks'),
+            CarbonImmutable::parse((string) $request->validated('repeat_until')),
+            $actor,
+        );
+
+        $message = $result['sessions']->count().' kegiatan "'.$result['series']->topic.'" dijadwalkan '
+            .Str::lcfirst($result['series']->describe())
+            .' sampai '.DateHelper::formatDate($result['series']->ends_on).'.';
+
+        if ($result['skipped'] !== []) {
+            $message .= ' '.count($result['skipped']).' tanggal dilewati karena halaqah ini sudah punya kegiatan di hari itu.';
+        }
+
+        Flash::success($message.' Daftar hadir sudah disiapkan untuk setiap pertemuan.');
+
+        return redirect()->route('sessions.show', $result['sessions']->first());
     }
 
     /**

@@ -24,6 +24,7 @@ class MentoringGroupService
     public function __construct(
         private readonly MentoringGroupRepositoryInterface $groups,
         private readonly UserRepositoryInterface $users,
+        private readonly LocationService $locations,
     ) {}
 
     /**
@@ -45,6 +46,7 @@ class MentoringGroupService
         return DB::transaction(function () use ($attributes, $memberIds): MentoringGroup {
             $group = $this->groups->create([
                 ...$attributes,
+                ...$this->defaultPlace($attributes),
                 'code' => $attributes['code'] ?? $this->groups->nextCode(),
             ]);
 
@@ -67,7 +69,7 @@ class MentoringGroupService
         }
 
         return DB::transaction(function () use ($group, $attributes, $memberIds): MentoringGroup {
-            $updated = $this->groups->update($group, $attributes);
+            $updated = $this->groups->update($group, [...$attributes, ...$this->defaultPlace($attributes)]);
 
             if ($memberIds !== null) {
                 $this->assignMembers($updated, $memberIds);
@@ -178,6 +180,24 @@ class MentoringGroupService
     public function options(?User $mentor = null): array
     {
         return $this->groups->options($mentor?->id);
+    }
+
+    /**
+     * The list row and the name to store for a halaqah's "Lokasi Rutin", when
+     * the form sent one.
+     *
+     * @param  array<string, mixed>  $attributes
+     * @return array{default_location?: string|null, default_location_id?: int|null}
+     */
+    private function defaultPlace(array $attributes): array
+    {
+        if (! array_key_exists('default_location', $attributes)) {
+            return [];
+        }
+
+        $place = $this->locations->resolve($attributes['default_location']);
+
+        return ['default_location' => $place['name'], 'default_location_id' => $place['id']];
     }
 
     /**

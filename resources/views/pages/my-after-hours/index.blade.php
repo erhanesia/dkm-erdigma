@@ -91,6 +91,7 @@
                                             <span class="ms-2"><i class="bi bi-geo-alt me-1"></i>{{ $session->location }}</span>
                                         @endif
                                     </div>
+                                    <x-rescheduled-badge :session="$session" class="mt-1" />
                                 </div>
 
                                 <span class="badge text-bg-{{ $session->status->color() }} flex-shrink-0">

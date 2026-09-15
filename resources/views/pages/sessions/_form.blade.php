@@ -46,16 +46,59 @@
                 <div class="card-body">
                     <h2 class="card-title mb-3">Waktu &amp; Tempat</h2>
 
-                    <x-form.field name="starts_at" label="Mulai" type="datetime-local"
-                                  :value="$session?->starts_at?->format('Y-m-d\TH:i')"
-                                  required />
+                    @if ($session)
+                        {{-- Moving a session is Jadwal Ulang's job: it keeps the time the
+                             session was first set for, which editing a field here would
+                             silently overwrite. --}}
+                        <div class="mb-3">
+                            <div class="form-label">Waktu</div>
+                            <div class="d-flex align-items-center justify-content-between gap-2">
+                                <span class="fw-medium" style="font-size:.875rem;">{{ $session->humanSchedule() }}</span>
+                                @if ($session->status === \App\Enums\SessionStatus::Scheduled)
+                                    <a href="{{ route('sessions.reschedule.edit', $session) }}"
+                                       wire:navigate class="btn btn-sm btn-light flex-shrink-0">
+                                        <i class="bi bi-calendar2-week me-1"></i> Jadwal Ulang
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @else
+                        <x-form.field name="starts_at" label="Mulai" type="datetime-local" required />
 
-                    <x-form.field name="ends_at" label="Selesai" type="datetime-local"
-                                  :value="$session?->ends_at?->format('Y-m-d\TH:i')"
-                                  required />
+                        <x-form.field name="ends_at" label="Selesai" type="datetime-local" required />
 
-                    <x-form.field name="location" label="Tempat" :value="$session?->location"
-                                  placeholder="Musholla lantai 1" />
+                        <div class="d-flex align-items-start justify-content-between py-2 border-top">
+                            <div class="pe-3">
+                                <div class="fw-semibold" style="font-size:.875rem;">Kegiatan berulang</div>
+                                <div class="text-secondary" style="font-size:.75rem;">
+                                    Jadwalkan sekaligus di hari dan jam yang sama sampai tanggal tertentu.
+                                </div>
+                            </div>
+                            <div class="form-check form-switch mb-0 flex-shrink-0">
+                                <input type="hidden" name="is_recurring" value="0">
+                                <input type="checkbox" name="is_recurring" value="1" class="form-check-input"
+                                       data-toggle-target="#recurrence-fields"
+                                       @checked(old('is_recurring'))>
+                            </div>
+                        </div>
+
+                        {{-- Every two weeks first: it is how most halaqah meet. --}}
+                        <div id="recurrence-fields" @style(['display: none' => ! old('is_recurring')])>
+                            <x-form.field name="repeat_every_weeks" label="Ulangi" type="select"
+                                          :value="2"
+                                          :options="[2 => 'Setiap 2 minggu', 1 => 'Setiap minggu']"
+                                          placeholder="— Pilih pengulangan —" />
+
+                            <x-form.field name="repeat_until" label="Sampai tanggal" type="date"
+                                          :hint="'Paling lama ' . $maxRecurrenceMonths . ' bulan dari kegiatan pertama. Semua pertemuan langsung dibuat, dan tanggal yang sudah punya kegiatan di halaqah ini dilewati.'" />
+                        </div>
+                    @endif
+
+                    <x-form.field name="location" label="Tempat" type="select"
+                                  :value="$session?->location" :options="$locations"
+                                  placeholder="Cari atau ketik tempat baru…"
+                                  hint="Tempat yang belum ada di daftar akan tersimpan untuk dipakai lagi."
+                                  searchable creatable />
 
                     <x-form.field name="status" label="Status" type="select"
                                   :value="$session?->status?->value ?? \App\Enums\SessionStatus::Scheduled->value"
