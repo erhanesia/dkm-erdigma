@@ -240,6 +240,25 @@ class AfterHoursSessionService
     }
 
     /**
+     * One month of public sessions, for the calendar on the public page.
+     *
+     * @return Collection<int, AfterHoursSession>
+     */
+    public function publicInMonth(CarbonImmutable $month): Collection
+    {
+        return $this->sessions->publicBetween($month->startOfMonth(), $month->endOfMonth());
+    }
+
+    /**
+     * `Y-m` of the earliest public session, or null when there has been none —
+     * how far back the public calendar opens.
+     */
+    public function firstPublicMonth(): ?string
+    {
+        return $this->sessions->firstPublicStart()?->format('Y-m');
+    }
+
+    /**
      * @return Collection<int, AfterHoursSession>
      */
     public function pastForMember(User $user, int $limit = 20): Collection

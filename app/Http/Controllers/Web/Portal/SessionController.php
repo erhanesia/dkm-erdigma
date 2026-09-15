@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Web\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Services\AfterHours\AfterHoursSessionService;
-use App\Support\Helpers\DateHelper;
 use Illuminate\View\View;
 
 /**
@@ -19,25 +18,20 @@ use Illuminate\View\View;
  */
 class SessionController extends Controller
 {
-    private const UPCOMING_LIMIT = 12;
-
     public function __construct(
         private readonly AfterHoursSessionService $sessions,
     ) {}
 
+    /**
+     * The page around the calendar.
+     *
+     * The month being read, its sessions and its agenda belong to
+     * `App\Livewire\PublicSessionCalendar`, which redraws only itself when the
+     * visitor moves to another month.
+     */
     public function index(): View
     {
-        $upcoming = $this->sessions->upcomingPublic(self::UPCOMING_LIMIT);
-
-        return view('pages.portal.sessions', [
-            // Grouped by day so a week with three sessions reads as a week
-            // rather than as three unrelated cards.
-            'sessionsByDate' => $upcoming->groupBy(
-                static fn ($session): string => $session->starts_at->toDateString(),
-            ),
-            'total' => $upcoming->count(),
-            'serverTime' => DateHelper::now(),
-        ]);
+        return view('pages.portal.sessions');
     }
 
     /**
