@@ -23,12 +23,14 @@ class RepositoryServiceProvider extends ServiceProvider
      */
     public array $bindings = [
         Contracts\AfterHoursSessionRepositoryInterface::class => Eloquent\AfterHoursSessionRepository::class,
+        Contracts\AfterHoursSessionSeriesRepositoryInterface::class => Eloquent\AfterHoursSessionSeriesRepository::class,
         Contracts\AttendanceRepositoryInterface::class => Eloquent\AttendanceRepository::class,
         Contracts\AudioTrackRepositoryInterface::class => Eloquent\AudioTrackRepository::class,
         Contracts\AudioZoneRepositoryInterface::class => Eloquent\AudioZoneRepository::class,
         Contracts\DeviceCommandRepositoryInterface::class => Eloquent\DeviceCommandRepository::class,
         Contracts\DeviceRepositoryInterface::class => Eloquent\DeviceRepository::class,
         Contracts\FridayScheduleRepositoryInterface::class => Eloquent\FridayScheduleRepository::class,
+        Contracts\LocationRepositoryInterface::class => Eloquent\LocationRepository::class,
         Contracts\MentoringGroupRepositoryInterface::class => Eloquent\MentoringGroupRepository::class,
         Contracts\MurottalScheduleRepositoryInterface::class => Eloquent\MurottalScheduleRepository::class,
         Contracts\PlaybackLogRepositoryInterface::class => Eloquent\PlaybackLogRepository::class,

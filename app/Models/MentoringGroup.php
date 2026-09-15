@@ -33,6 +33,7 @@ class MentoringGroup extends Model
         'capacity',
         'description',
         'default_location',
+        'default_location_id',
         'is_active',
     ];
 
@@ -65,6 +66,16 @@ class MentoringGroup extends Model
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentor_id');
+    }
+
+    /**
+     * Where the halaqah usually meets, as a row in the shared place list.
+     *
+     * @return BelongsTo<Location, $this>
+     */
+    public function defaultPlace(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'default_location_id');
     }
 
     /**

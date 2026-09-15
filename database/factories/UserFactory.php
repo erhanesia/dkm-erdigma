@@ -54,6 +54,15 @@ class UserFactory extends Factory
     }
 
     /**
+     * A mentor (ustadz): the domain flag the halaqah rules check, and the role
+     * the panel routes check.
+     */
+    public function mentor(): static
+    {
+        return $this->state(['is_mentor' => true])->withRole(UserRole::Mentor);
+    }
+
+    /**
      * Give the user one of the application's roles.
      *
      * Roles live in the permission tables rather than on the user row, and a

@@ -25,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property SessionStatus $status
  * @property Carbon $starts_at
  * @property Carbon $ends_at
+ * @property Carbon|null $rescheduled_from
  */
 #[Hidden(['qr_token'])]
 class AfterHoursSession extends Model
@@ -35,12 +36,16 @@ class AfterHoursSession extends Model
     /** @var array<int, string> */
     protected $fillable = [
         'mentoring_group_id',
+        'series_id',
         'mentor_id',
         'topic',
         'description',
         'starts_at',
         'ends_at',
+        'rescheduled_from',
+        'reschedule_reason',
         'location',
+        'location_id',
         'status',
         'qr_token',
         'is_qr_enabled',
@@ -50,7 +55,7 @@ class AfterHoursSession extends Model
     ];
 
     /** @var array<int, string> */
-    protected array $auditable = ['topic', 'starts_at', 'ends_at', 'location', 'status'];
+    protected array $auditable = ['topic', 'starts_at', 'ends_at', 'reschedule_reason', 'location', 'status'];
 
     /**
      * @return array<string, string>
@@ -60,6 +65,7 @@ class AfterHoursSession extends Model
         return [
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'rescheduled_from' => 'datetime',
             'status' => SessionStatus::class,
             'is_qr_enabled' => 'boolean',
             'is_public' => 'boolean',
@@ -84,6 +90,31 @@ class AfterHoursSession extends Model
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'mentor_id');
+    }
+
+    /**
+     * The standing appointment this meeting belongs to, when it was scheduled
+     * as part of one.
+     *
+     * @return BelongsTo<AfterHoursSessionSeries, $this>
+     */
+    public function series(): BelongsTo
+    {
+        return $this->belongsTo(AfterHoursSessionSeries::class, 'series_id');
+    }
+
+    /**
+     * The place, as a row in the shared list.
+     *
+     * Not called `location`: that name is the text column holding the name the
+     * session was held under, and an attribute always wins over a relation of
+     * the same name.
+     *
+     * @return BelongsTo<Location, $this>
+     */
+    public function place(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'location_id');
     }
 
     /**
@@ -146,6 +177,14 @@ class AfterHoursSession extends Model
     public function attendingCount(): int
     {
         return $this->attendances()->whereIn('status', AttendanceStatus::attendingValues())->count();
+    }
+
+    /**
+     * Whether the session was moved from the time it was first set for.
+     */
+    public function isRescheduled(): bool
+    {
+        return $this->rescheduled_from !== null;
     }
 
     public function humanSchedule(): string

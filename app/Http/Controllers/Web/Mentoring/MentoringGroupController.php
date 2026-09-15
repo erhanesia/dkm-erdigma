@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MentoringGroup\StoreMentoringGroupRequest;
 use App\Models\MentoringGroup;
 use App\Models\User;
+use App\Services\AfterHours\LocationService;
 use App\Services\AfterHours\MentoringGroupService;
 use App\Services\User\UserService;
 use App\Support\Helpers\Flash;
@@ -26,6 +27,7 @@ class MentoringGroupController extends Controller
     public function __construct(
         private readonly MentoringGroupService $groups,
         private readonly UserService $users,
+        private readonly LocationService $locations,
     ) {}
 
     public function index(Request $request): View
@@ -44,6 +46,7 @@ class MentoringGroupController extends Controller
     {
         return view('pages.mentoring-groups.create', [
             'mentors' => $this->users->mentorOptions(),
+            'locations' => $this->locations->options(),
             'employees' => $this->groups->assignableEmployees(),
             'defaultCapacity' => (int) config('dkm.mentoring.default_group_capacity'),
         ]);
@@ -79,6 +82,7 @@ class MentoringGroupController extends Controller
         return view('pages.mentoring-groups.edit', [
             'group' => $mentoringGroup->load('members'),
             'mentors' => $this->users->mentorOptions(),
+            'locations' => $this->locations->options($mentoringGroup->default_location),
             'employees' => $this->groups->assignableEmployees($mentoringGroup),
             'selectedMemberIds' => $mentoringGroup->members->pluck('id')->all(),
         ]);

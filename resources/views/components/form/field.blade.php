@@ -9,6 +9,7 @@
     'options' => null,
     'picker' => null,
     'searchable' => false,
+    'creatable' => false,
     'multiple' => false,
     'rows' => 3,
 ])
@@ -38,6 +39,7 @@
                 @class(['form-select', 'is-invalid' => $hasError])
                 @if ($multiple) multiple @endif
                 @if ($searchable) data-searchable data-placeholder="{{ $placeholder ?? 'Cari lalu pilih…' }}" @endif
+                @if ($creatable) data-creatable @endif
                 @if ($required) required @endif
                 {{ $attributes->except(['class', 'id']) }}>
 
