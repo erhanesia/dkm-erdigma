@@ -1618,6 +1618,14 @@
         color: $white;
         background: $brand-700;
     }
+
+    // A month the page cannot open on — before the first public session, say.
+    // Still in the grid, so the year keeps its shape.
+    &:disabled {
+        color: $neutral-300;
+        background: transparent;
+        pointer-events: none;
+    }
 }
 
 // The slot holds its column whether or not a request is in flight, so nothing
@@ -1667,7 +1675,8 @@
  * and arrive in sequence from the delays already in the markup, so a second
  * animation on the wrapper would fight with them.
  */
-.landing-friday-swap {
+.landing-friday-swap,
+.landing-calendar-swap {
     transition: opacity 180ms $ease-out, filter 180ms $ease-out;
 
     &.is-fetching {
@@ -1783,6 +1792,158 @@
         color: $neutral-300;
         background: $neutral-50;
         pointer-events: none;
+    }
+}
+
+// =============================================================================
+// After Hours calendar
+// =============================================================================
+
+/*
+ * A month of announced sessions at a glance.
+ *
+ * Monday first, like the office's week. Each day holds its sessions as small
+ * links — the time and the topic — because a date on its own would send the
+ * visitor down to the agenda just to learn what happens on it. On a phone a
+ * cell is too narrow for words, so the links shrink to dots and the agenda
+ * underneath becomes the reading view.
+ */
+.landing-calendar {
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+    background: $white;
+    border: 1px solid $neutral-200;
+    border-radius: $border-radius-lg;
+}
+
+.landing-calendar-head,
+.landing-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.landing-calendar-head {
+    background: $neutral-50;
+    border-bottom: 1px solid $neutral-200;
+
+    > div {
+        padding: 0.55rem 0.5rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-align: center;
+        text-transform: uppercase;
+        color: $neutral-500;
+    }
+}
+
+.landing-calendar-day {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    min-height: 6.5rem;
+    padding: 0.4rem;
+    border-right: 1px solid $neutral-100;
+    border-bottom: 1px solid $neutral-100;
+
+    // The card's own border already closes the last column and the last row.
+    &:nth-child(7n) {
+        border-right: 0;
+    }
+
+    &:nth-last-child(-n + 7) {
+        border-bottom: 0;
+    }
+
+    &.is-outside {
+        background: $neutral-50;
+
+        .landing-calendar-date {
+            color: $neutral-300;
+        }
+    }
+
+    &.is-today .landing-calendar-date {
+        color: $white;
+        background: $brand-700;
+    }
+}
+
+.landing-calendar-date {
+    display: grid;
+    place-items: center;
+    align-self: flex-end;
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: $neutral-700;
+    border-radius: 50%;
+}
+
+.landing-calendar-event {
+    display: block;
+    padding: 0.2rem 0.4rem;
+    overflow: hidden;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    color: $brand-800;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: $brand-50;
+    border-radius: $border-radius-sm;
+    transition: color $transition-base, background-color $transition-base;
+
+    &:hover {
+        color: $white;
+        background: $brand-700;
+    }
+
+    // Held sessions stay — they are part of the record — but step back so
+    // what is still to come stands out.
+    &.is-completed {
+        color: $neutral-500;
+        background: $neutral-100;
+    }
+}
+
+.landing-calendar-event-time {
+    margin-right: 0.25rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+@include media-breakpoint-down(md) {
+    .landing-calendar-day {
+        align-items: center;
+        min-height: 3.4rem;
+        padding: 0.3rem 0.15rem;
+    }
+
+    .landing-calendar-date {
+        align-self: center;
+    }
+
+    // Too narrow for words: a dot per session, and the agenda does the telling.
+    .landing-calendar-event,
+    .landing-calendar-event.is-completed {
+        width: 0.45rem;
+        height: 0.45rem;
+        padding: 0;
+        background: $brand-600;
+        border-radius: 50%;
+    }
+
+    .landing-calendar-event.is-completed {
+        background: $neutral-300;
+    }
+
+    .landing-calendar-event-time,
+    .landing-calendar-event-title {
+        display: none;
     }
 }
 

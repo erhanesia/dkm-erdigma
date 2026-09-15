@@ -20,6 +20,21 @@ use Spatie\QueryBuilder\QueryBuilder;
  */
 class AfterHoursSessionRepository extends BaseRepository implements AfterHoursSessionRepositoryInterface
 {
+    /**
+     * What the public may see of a session: announced, under way, or held.
+     * A cancelled session is no longer an announcement.
+     *
+     * Shared by the detail page and the calendar, so nothing the calendar shows
+     * can lead to a page that refuses to open.
+     *
+     * @var array<int, string>
+     */
+    private const PUBLIC_STATUSES = [
+        SessionStatus::Scheduled->value,
+        SessionStatus::Ongoing->value,
+        SessionStatus::Completed->value,
+    ];
+
     protected string $defaultOrderColumn = 'starts_at';
 
     protected string $defaultOrderDirection = 'desc';
@@ -152,7 +167,7 @@ class AfterHoursSessionRepository extends BaseRepository implements AfterHoursSe
                 'mentor',
             ])
             ->where('is_public', true)
-            ->whereIn('status', [SessionStatus::Scheduled->value, SessionStatus::Ongoing->value, SessionStatus::Completed->value])
+            ->whereIn('status', self::PUBLIC_STATUSES)
             ->find($id);
     }
 
@@ -165,6 +180,31 @@ class AfterHoursSessionRepository extends BaseRepository implements AfterHoursSe
             ->upcoming()
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Like the listing, only `group` and `mentor` are loaded — never the
+     * memberships — so the calendar cannot put a roster in front of a stranger.
+     */
+    public function publicBetween(CarbonImmutable $from, CarbonImmutable $to): Collection
+    {
+        return $this->query()
+            ->with(['group', 'mentor'])
+            ->where('is_public', true)
+            ->whereIn('status', self::PUBLIC_STATUSES)
+            ->between($from, $to)
+            ->orderBy('starts_at')
+            ->get();
+    }
+
+    public function firstPublicStart(): ?CarbonImmutable
+    {
+        $startsAt = $this->query()
+            ->where('is_public', true)
+            ->whereIn('status', self::PUBLIC_STATUSES)
+            ->min('starts_at');
+
+        return $startsAt === null ? null : CarbonImmutable::parse((string) $startsAt);
     }
 
     public function between(CarbonImmutable $from, CarbonImmutable $to, ?array $groupIds = null): Collection
