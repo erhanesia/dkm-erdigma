@@ -1,11 +1,36 @@
 @php
     /** @var \App\Models\AfterHoursSession|null $session */
     $session ??= null;
+
+    // A completed session keeps only its status and last reading open.
+    $isLocked = $session !== null && ! $session->status->isEditable();
 @endphp
 
-<form method="POST" action="{{ $session ? route('sessions.update', $session) : route('sessions.store') }}">
+{{-- Finishing a session locks it, so the form asks first — but only when
+     Selesai is what is being saved. --}}
+<form method="POST" action="{{ $session ? route('sessions.update', $session) : route('sessions.store') }}"
+      @unless ($isLocked)
+          data-confirm="Setelah diselesaikan, data kegiatan dikunci: hanya status dan bacaan terakhir yang masih bisa diubah, dan presensi tidak bisa diisi lagi. Pastikan presensi sudah lengkap."
+          data-confirm-if="status={{ \App\Enums\SessionStatus::Completed->value }}"
+          data-confirm-title="Selesaikan kegiatan?"
+          data-confirm-button="Ya, selesaikan"
+          data-confirm-icon="question"
+          data-confirm-tone="primary"
+      @endunless>
     @csrf
     @if ($session) @method('PUT') @endif
+
+    @if ($isLocked)
+        <div class="alert alert-warning d-flex gap-2 align-items-start" data-aos="fade-up">
+            <i class="bi bi-lock"></i>
+            <div>
+                <strong>Kegiatan ini sudah selesai.</strong>
+                Hanya status dan bacaan terakhir yang masih bisa diubah. Untuk mengubah data
+                lainnya atau mengisi presensi, kembalikan statusnya ke Terjadwal atau Berlangsung
+                lalu simpan.
+            </div>
+        </div>
+    @endif
 
     <div class="row">
         <div class="col-12 col-lg-7">
@@ -21,21 +46,27 @@
                     <x-form.field name="topic" label="Materi Kegiatan" :value="$session?->topic"
                                   placeholder="Contoh: Kajian Tafsir Surat Al-Kahfi"
                                   hint="Dipakai sebagai judul kegiatan di seluruh tampilan."
+                                  :disabled="$isLocked"
                                   required />
 
                     <x-form.field name="mentoring_group_id" label="Halaqah" type="select"
                                   :value="$session?->mentoring_group_id" :options="$groups"
                                   hint="Daftar hadir dan daftar peserta diambil dari anggota halaqah ini."
+                                  :disabled="$isLocked"
                                   searchable required />
 
                     <x-form.field name="description" label="Deskripsi" type="textarea"
                                   :value="$session?->description"
+                                  :disabled="$isLocked"
                                   placeholder="Penjelasan singkat isi kegiatan" />
 
+                    {{-- Stored in `summary`. The halaqah reads together, so one
+                         position covers every member present. --}}
                     @if ($session)
-                        <x-form.field name="summary" label="Ringkasan Hasil" type="textarea"
+                        <x-form.field name="summary" label="Bacaan Terakhir" type="textarea"
                                       :value="$session->summary"
-                                      placeholder="Diisi setelah kegiatan selesai" />
+                                      placeholder="Contoh: Al-Baqarah ayat 24"
+                                      hint="Tulis sampai mana bacaan Al-Qur'an halaqah di pertemuan ini, supaya pertemuan berikutnya tahu harus mulai dari mana. Boleh ditambah catatan singkat, misalnya bagian tajwid yang perlu diulang. Tetap bisa diisi setelah kegiatan selesai." />
                     @endif
                 </div>
             </div>
@@ -98,6 +129,7 @@
                                   :value="$session?->location" :options="$locations"
                                   placeholder="Cari atau ketik tempat baru…"
                                   hint="Tempat yang belum ada di daftar akan tersimpan untuk dipakai lagi."
+                                  :disabled="$isLocked"
                                   searchable creatable />
 
                     <x-form.field name="status" label="Status" type="select"
@@ -116,7 +148,8 @@
                         <div class="form-check form-switch mb-0 flex-shrink-0">
                             <input type="hidden" name="is_qr_enabled" value="0">
                             <input type="checkbox" name="is_qr_enabled" value="1" class="form-check-input"
-                                   @checked(old('is_qr_enabled', $session?->is_qr_enabled ?? true))>
+                                   @checked(old('is_qr_enabled', $session?->is_qr_enabled ?? true))
+                                   @disabled($isLocked)>
                         </div>
                     </div>
 
@@ -133,7 +166,8 @@
                         <div class="form-check form-switch mb-0 flex-shrink-0">
                             <input type="hidden" name="is_public" value="0">
                             <input type="checkbox" name="is_public" value="1" class="form-check-input"
-                                   @checked(old('is_public', $session?->is_public ?? true))>
+                                   @checked(old('is_public', $session?->is_public ?? true))
+                                   @disabled($isLocked)>
                         </div>
                     </div>
                 </div>

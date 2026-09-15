@@ -47,6 +47,41 @@
         </div>
     </div>
 
+    {{-- Where the halaqah's reading stands, taken from its most recent meeting
+         that recorded one — and that meeting is named, so it is clear how
+         current the position is. --}}
+    <div class="card mb-3" data-aos="fade-up">
+        <div class="card-body d-flex align-items-start gap-3">
+            <span class="d-grid rounded-3 bg-primary-subtle text-primary flex-shrink-0"
+                  style="width:44px;height:44px;place-items:center;font-size:1.25rem;">
+                <i class="bi bi-book"></i>
+            </span>
+
+            <div class="flex-grow-1 min-w-0">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                    <h2 class="card-title mb-0">Bacaan Terakhir</h2>
+                    @if ($latestReading)
+                        <span class="badge text-bg-primary bg-opacity-10 text-primary">Terbaru</span>
+                    @endif
+                </div>
+
+                @if ($latestReading)
+                    <p class="fw-semibold mb-1" style="white-space:pre-line;">{{ $latestReading->summary }}</p>
+                    <div class="text-secondary" style="font-size:.75rem;">
+                        Dicatat di kegiatan
+                        <a href="{{ route('sessions.show', $latestReading) }}" wire:navigate>{{ $latestReading->topic }}</a>
+                        &middot; {{ DateHelper::formatLongDate($latestReading->starts_at) }}
+                    </div>
+                @else
+                    <p class="text-secondary mb-0" style="font-size:.875rem;">
+                        Belum ada bacaan yang dicatat. Isi <strong>Bacaan Terakhir</strong> di kegiatan halaqah ini
+                        setelah pertemuan, dan posisinya akan tampil di sini.
+                    </p>
+                @endif
+            </div>
+        </div>
+    </div>
+
     <div class="row g-3">
         <div class="col-12 col-lg-5">
             <div class="card h-100" data-aos="fade-up">

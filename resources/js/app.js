@@ -188,6 +188,24 @@ function initCountUp() {
 }
 
 /**
+ * Whether a form's confirmation applies to what is being submitted.
+ *
+ * `data-confirm-if="status=completed"` asks only when that field holds that
+ * value; a form without the attribute always asks.
+ */
+function confirmationApplies(form) {
+    const condition = form.dataset.confirmIf;
+
+    if (!condition) {
+        return true;
+    }
+
+    const [name, value] = condition.split('=');
+
+    return form.elements.namedItem(name)?.value === value;
+}
+
+/**
  * Destructive actions ask first, in Indonesian, and say what will happen.
  *
  * Bound once to `document`, so it keeps working across navigations without
@@ -197,7 +215,7 @@ function bindConfirmations() {
     document.addEventListener('submit', (event) => {
         const form = event.target.closest('form[data-confirm]');
 
-        if (!form || form.dataset.confirmed === 'true') {
+        if (!form || form.dataset.confirmed === 'true' || !confirmationApplies(form)) {
             return;
         }
 
@@ -212,7 +230,8 @@ function bindConfirmations() {
             cancelButtonText: 'Batal',
             reverseButtons: true,
             customClass: {
-                confirmButton: 'btn btn-danger px-3',
+                // Red by default; a confirmation that is not a deletion can say so.
+                confirmButton: `btn btn-${form.dataset.confirmTone ?? 'danger'} px-3`,
                 cancelButton: 'btn btn-light px-3 me-2',
             },
             buttonsStyling: false,

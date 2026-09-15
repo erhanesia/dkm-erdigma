@@ -48,6 +48,22 @@
                             @endif
                         </dl>
 
+                        {{-- The halaqah reads together, so its last reading is this member's too. --}}
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="text-secondary mb-1" style="font-size:.75rem;">
+                                <i class="bi bi-book me-1"></i> Bacaan Terakhir
+                            </div>
+                            @if ($latestReading)
+                                <p class="fw-semibold mb-1" style="font-size:.875rem;white-space:pre-line;">{{ $latestReading->summary }}</p>
+                                <div class="text-body-tertiary" style="font-size:.75rem;">
+                                    {{ $latestReading->topic }} &middot;
+                                    {{ \App\Support\Helpers\DateHelper::formatLongDate($latestReading->starts_at) }}
+                                </div>
+                            @else
+                                <p class="text-body-tertiary mb-0" style="font-size:.8125rem;">Belum ada bacaan yang dicatat.</p>
+                            @endif
+                        </div>
+
                         @if ($group->description)
                             <p class="text-secondary mt-3 mb-0" style="font-size:.8125rem;">
                                 {{ $group->description }}

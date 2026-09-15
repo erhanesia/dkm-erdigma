@@ -43,6 +43,12 @@ interface AfterHoursSessionRepositoryInterface extends RepositoryInterface
     public function pastForMember(int $userId, int $limit = 20): Collection;
 
     /**
+     * The halaqah's most recent session with a last reading written down.
+     * Cancelled sessions are skipped: no reading happened at them.
+     */
+    public function latestReadingForGroup(int $groupId): ?AfterHoursSession;
+
+    /**
      * Sessions the mosque has agreed to announce publicly.
      *
      * @return Collection<int, AfterHoursSession>

@@ -45,6 +45,8 @@ class MyAfterHoursController extends Controller
 
         return view('pages.my-after-hours.index', [
             'group' => $group?->loadMissing(['mentor', 'members']),
+            // The halaqah reads together, so its last reading is every member's.
+            'latestReading' => $group ? $this->sessions->latestReading($group) : null,
             'upcoming' => $this->sessions->upcomingForMember($user, self::UPCOMING_LIMIT),
             'past' => $this->sessions->pastForMember($user, self::HISTORY_LIMIT),
             'currentUser' => $user,

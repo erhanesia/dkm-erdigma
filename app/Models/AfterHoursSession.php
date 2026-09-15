@@ -54,8 +54,13 @@ class AfterHoursSession extends Model
         'created_by',
     ];
 
-    /** @var array<int, string> */
-    protected array $auditable = ['topic', 'starts_at', 'ends_at', 'reschedule_reason', 'location', 'status'];
+    /**
+     * `summary` is the last reading. It is logged because it is the one detail
+     * still written after a session is completed.
+     *
+     * @var array<int, string>
+     */
+    protected array $auditable = ['topic', 'starts_at', 'ends_at', 'reschedule_reason', 'location', 'status', 'summary'];
 
     /**
      * @return array<string, string>

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MentoringGroup\StoreMentoringGroupRequest;
 use App\Models\MentoringGroup;
 use App\Models\User;
+use App\Services\AfterHours\AfterHoursSessionService;
 use App\Services\AfterHours\LocationService;
 use App\Services\AfterHours\MentoringGroupService;
 use App\Services\User\UserService;
@@ -28,6 +29,7 @@ class MentoringGroupController extends Controller
         private readonly MentoringGroupService $groups,
         private readonly UserService $users,
         private readonly LocationService $locations,
+        private readonly AfterHoursSessionService $sessions,
     ) {}
 
     public function index(Request $request): View
@@ -72,6 +74,7 @@ class MentoringGroupController extends Controller
             'members' => $mentoringGroup->members,
             'remainingSlots' => $mentoringGroup->remainingSlots(),
             'sessions' => $mentoringGroup->sessions()->latest('starts_at')->limit(10)->get(),
+            'latestReading' => $this->sessions->latestReading($mentoringGroup),
         ]);
     }
 

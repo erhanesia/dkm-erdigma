@@ -5,7 +5,7 @@
 @section('content')
     <x-page-header
         :title="'Ubah ' . $session->topic"
-        subtitle="Kegiatan yang sudah selesai tidak bisa diubah lagi." />
+        subtitle="Setelah kegiatan selesai, hanya status dan bacaan terakhir yang masih bisa diubah." />
 
     @include('pages.sessions._form')
 @endsection
