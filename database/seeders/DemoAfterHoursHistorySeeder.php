@@ -80,12 +80,19 @@ class DemoAfterHoursHistorySeeder extends Seeder
         ['Muhasabah Akhir Bulan', 'Evaluasi target ibadah pribadi dan saling berbagi kendala.'],
     ];
 
-    /** @var array<int, string> */
-    private const SUMMARIES = [
-        'Peserta aktif bertanya, pembahasan dilanjutkan pekan depan.',
-        'Materi selesai tepat waktu, ditutup dengan tanya jawab singkat.',
-        'Sebagian peserta izin dinas; rekaman catatan dibagikan di grup.',
-        'Praktik bergantian berjalan baik, beberapa peserta perlu latihan tambahan.',
+    /**
+     * Last readings, written into `summary`: where the halaqah stopped, with
+     * the occasional note a mentor adds.
+     *
+     * @var array<int, string>
+     */
+    private const READINGS = [
+        'Al-Baqarah ayat 24',
+        'Ali Imran ayat 18, ulang bacaan mad thabi\'i',
+        'An-Nisa ayat 11',
+        'Al-Kahfi ayat 10, lanjut tadabbur ayat 11–16',
+        'Yasin ayat 40',
+        'Al-Mulk ayat 15, perhatikan dengung ikhfa',
     ];
 
     /** @var array<int, string> */
@@ -270,7 +277,7 @@ class DemoAfterHoursHistorySeeder extends Seeder
                 'qr_token' => TokenHelper::generateSessionToken(),
                 'is_qr_enabled' => ! $isPast,
                 'is_public' => fake()->boolean(70),
-                'summary' => $status === SessionStatus::Completed ? fake()->randomElement(self::SUMMARIES) : null,
+                'summary' => $status === SessionStatus::Completed ? fake()->randomElement(self::READINGS) : null,
                 'created_by' => $admin->id,
                 'created_at' => $startsAt->subDays(7)->toDateTimeString(),
                 'updated_at' => ($isPast ? $startsAt->addHours(2) : $startsAt->subDays(7))->toDateTimeString(),

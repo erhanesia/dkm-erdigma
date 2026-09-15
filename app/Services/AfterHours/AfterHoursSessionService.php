@@ -18,6 +18,7 @@ use App\Support\Helpers\TokenHelper;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -26,6 +27,14 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
  */
 class AfterHoursSessionService
 {
+    /**
+     * What may still change once a session is completed: its status, so it can
+     * be reopened, and the halaqah's last reading (the `summary` column).
+     *
+     * @var array<int, string>
+     */
+    public const EDITABLE_ONCE_COMPLETED = ['status', 'summary'];
+
     public function __construct(
         private readonly AfterHoursSessionRepositoryInterface $sessions,
         private readonly AttendanceRepositoryInterface $attendances,
@@ -79,8 +88,14 @@ class AfterHoursSessionService
      */
     public function update(AfterHoursSession $session, array $attributes): AfterHoursSession
     {
+        /*
+         * A completed session is the record of what happened, so its details stay
+         * as they were. Two things are still allowed: reopening it — a mentor who
+         * marked it finished too early has to be able to take that back — and the
+         * last reading, which is written after the meeting by its nature.
+         */
         if (! $session->status->isEditable()) {
-            throw new BusinessRuleException('Sesi yang sudah selesai tidak dapat diubah.');
+            return $this->sessions->update($session, Arr::only($attributes, self::EDITABLE_ONCE_COMPLETED));
         }
 
         // Only a caller that sends a time has one to check. The edit form no
@@ -269,6 +284,15 @@ class AfterHoursSessionService
     public function upcomingForMember(User $user, int $limit = 5): Collection
     {
         return $this->sessions->upcomingForMember($user->id, $limit);
+    }
+
+    /**
+     * Where the halaqah's Qur'an reading stands: the most recent meeting that
+     * recorded one.
+     */
+    public function latestReading(MentoringGroup $group): ?AfterHoursSession
+    {
+        return $this->sessions->latestReadingForGroup($group->id);
     }
 
     /**

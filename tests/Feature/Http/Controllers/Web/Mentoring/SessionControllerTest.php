@@ -257,6 +257,131 @@ class SessionControllerTest extends TestCase
             ->assertSee('Setiap 2 minggu, hari Selasa');
     }
 
+    public function test_a_completed_session_still_takes_its_last_reading(): void
+    {
+        $session = $this->completedSession();
+
+        $response = $this->actingAs($this->boardMember())->put(route('sessions.update', $session), [
+            'status' => SessionStatus::Completed->value,
+            'summary' => 'Al-Baqarah ayat 24',
+        ]);
+
+        $response->assertRedirect(route('sessions.show', $session))->assertSessionHasNoErrors();
+
+        $this->assertSame('Al-Baqarah ayat 24', $session->refresh()->summary);
+    }
+
+    public function test_a_session_completed_by_mistake_can_be_reopened(): void
+    {
+        $session = $this->completedSession();
+
+        $this->actingAs($this->boardMember())->put(route('sessions.update', $session), [
+            'status' => SessionStatus::Ongoing->value,
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame(SessionStatus::Ongoing, $session->refresh()->status);
+    }
+
+    public function test_a_completed_session_keeps_its_other_details_even_when_they_are_sent(): void
+    {
+        $session = $this->completedSession(['topic' => 'Tahsin Al-Quran', 'location' => 'Musholla Erdigma']);
+
+        $this->actingAs($this->boardMember())->put(route('sessions.update', $session), $this->sessionPayload($session->group, [
+            'topic' => 'Materi baru',
+            'location' => 'Aula Lantai 3',
+            'is_public' => '0',
+            'status' => SessionStatus::Completed->value,
+            'summary' => 'An-Nisa ayat 11',
+        ]))->assertSessionHasNoErrors();
+
+        $session->refresh();
+
+        $this->assertSame('Tahsin Al-Quran', $session->topic);
+        $this->assertSame('Musholla Erdigma', $session->location);
+        $this->assertTrue($session->is_public);
+        $this->assertSame('An-Nisa ayat 11', $session->summary);
+    }
+
+    public function test_the_halaqahs_mentor_can_write_the_reading_of_a_completed_session(): void
+    {
+        $session = $this->completedSession();
+
+        $this->actingAs($session->group->mentor)->put(route('sessions.update', $session), [
+            'status' => SessionStatus::Completed->value,
+            'summary' => 'Al-Kahfi ayat 10',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame('Al-Kahfi ayat 10', $session->refresh()->summary);
+    }
+
+    public function test_a_mentor_cannot_write_the_reading_of_another_halaqahs_session(): void
+    {
+        $session = $this->completedSession();
+
+        $response = $this->actingAs(User::factory()->mentor()->create())->put(route('sessions.update', $session), [
+            'status' => SessionStatus::Completed->value,
+            'summary' => 'Al-Kahfi ayat 10',
+        ]);
+
+        $response->assertForbidden();
+
+        $this->assertNull($session->refresh()->summary);
+    }
+
+    public function test_the_edit_form_of_a_completed_session_leaves_only_status_and_reading_open(): void
+    {
+        $session = $this->completedSession();
+
+        $response = $this->actingAs($this->boardMember())->get(route('sessions.edit', $session));
+
+        $response->assertOk()
+            ->assertSee('Kegiatan ini sudah selesai.')
+            ->assertSee('Bacaan Terakhir')
+            ->assertDontSee('data-confirm-if', false);
+
+        $html = $response->getContent();
+
+        $this->assertMatchesRegularExpression('/<input[^>]*name="topic"[^>]*disabled/', $html);
+        $this->assertDoesNotMatchRegularExpression('/<textarea[^>]*name="summary"[^>]*disabled/', $html);
+        $this->assertDoesNotMatchRegularExpression('/<select[^>]*name="status"[^>]*disabled/', $html);
+    }
+
+    public function test_the_edit_form_asks_before_a_session_is_completed(): void
+    {
+        $session = AfterHoursSession::factory()->create();
+
+        $response = $this->actingAs($this->boardMember())->get(route('sessions.edit', $session));
+
+        $response->assertOk()
+            ->assertSee('data-confirm-if="status=completed"', false)
+            ->assertDontSee('Kegiatan ini sudah selesai.');
+    }
+
+    public function test_session_details_show_the_last_reading(): void
+    {
+        $session = $this->completedSession(['summary' => 'Al-Baqarah ayat 24']);
+
+        $response = $this->actingAs($this->boardMember())->get(route('sessions.show', $session));
+
+        $response->assertOk()
+            ->assertSee('Bacaan Terakhir')
+            ->assertSee('Al-Baqarah ayat 24');
+    }
+
+    /**
+     * Last Tuesday's meeting, already marked Selesai.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    private function completedSession(array $attributes = []): AfterHoursSession
+    {
+        return AfterHoursSession::factory()->completed()->create([
+            'starts_at' => '2026-09-08 16:30:00',
+            'ends_at' => '2026-09-08 18:00:00',
+            ...$attributes,
+        ]);
+    }
+
     /**
      * A Tuesday meeting, 16:30 to 18:00, as the create form would post it.
      *

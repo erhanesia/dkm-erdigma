@@ -116,6 +116,21 @@ class AfterHoursSessionRepository extends BaseRepository implements AfterHoursSe
             ->get();
     }
 
+    /**
+     * Ordered by when the meeting took place, not when the note was typed: a
+     * reading filled in late for an older meeting must not overtake a newer one.
+     */
+    public function latestReadingForGroup(int $groupId): ?AfterHoursSession
+    {
+        return $this->query()
+            ->where('mentoring_group_id', $groupId)
+            ->whereNotNull('summary')
+            ->where('summary', '!=', '')
+            ->where('status', '!=', SessionStatus::Cancelled->value)
+            ->orderByDesc('starts_at')
+            ->first();
+    }
+
     public function upcomingForMember(int $userId, int $limit = 5): Collection
     {
         return $this->query()

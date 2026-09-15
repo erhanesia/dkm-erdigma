@@ -118,10 +118,23 @@
                         </div>
                     @endif
 
-                    @if ($session->summary)
+                    {{-- Always shown, so a mentor sees at a glance whether it still
+                         needs filling in — even after the session is completed. --}}
+                    @if ($session->summary || $session->status !== \App\Enums\SessionStatus::Cancelled)
                         <div class="pt-3 mt-3 border-top">
-                            <div class="text-secondary mb-1" style="font-size:.75rem;">Ringkasan Hasil</div>
-                            <p class="mb-0" style="font-size:.875rem;">{{ $session->summary }}</p>
+                            <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+                                <span class="text-secondary" style="font-size:.75rem;">
+                                    <i class="bi bi-book me-1"></i> Bacaan Terakhir
+                                </span>
+                                <a href="{{ route('sessions.edit', $session) }}" wire:navigate style="font-size:.75rem;">
+                                    {{ $session->summary ? 'Ubah' : 'Isi bacaan terakhir' }}
+                                </a>
+                            </div>
+                            @if ($session->summary)
+                                <p class="mb-0 fw-medium" style="font-size:.875rem;white-space:pre-line;">{{ $session->summary }}</p>
+                            @else
+                                <p class="mb-0 text-body-tertiary" style="font-size:.8125rem;">Belum diisi.</p>
+                            @endif
                         </div>
                     @endif
                 </div>

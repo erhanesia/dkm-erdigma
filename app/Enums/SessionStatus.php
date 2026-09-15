@@ -54,6 +54,12 @@ enum SessionStatus: string implements HasLabel
         return in_array($this, [self::Scheduled, self::Ongoing], true);
     }
 
+    /**
+     * Whether every detail of the session can still change.
+     *
+     * A completed session keeps only its status and last reading open — see
+     * `AfterHoursSessionService::EDITABLE_ONCE_COMPLETED`.
+     */
     public function isEditable(): bool
     {
         return $this !== self::Completed;
