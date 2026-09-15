@@ -61,6 +61,19 @@ interface AfterHoursSessionRepositoryInterface extends RepositoryInterface
     public function upcomingPublic(int $limit = 5): Collection;
 
     /**
+     * Public sessions starting in the window, for the calendar. The same
+     * statuses as findPublic(), so every entry on it opens.
+     *
+     * @return Collection<int, AfterHoursSession>
+     */
+    public function publicBetween(CarbonImmutable $from, CarbonImmutable $to): Collection;
+
+    /**
+     * When the earliest public session started, or null when there has been none.
+     */
+    public function firstPublicStart(): ?CarbonImmutable;
+
+    /**
      * @return Collection<int, AfterHoursSession>
      */
     public function between(CarbonImmutable $from, CarbonImmutable $to, ?array $groupIds = null): Collection;
