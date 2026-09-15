@@ -14,8 +14,8 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
- * The public After Hours page's calendar: one month of announced sessions as a
- * grid, and the same month as an agenda underneath.
+ * The public After Hours page's calendar: one month of announced sessions, each
+ * on its day as a card with the time, the topic, the speaker and the place.
  *
  * Built like the prayer and Friday month browsers, so the three public schedule
  * pages behave as one: the same toolbar, the same `bulan` in the address bar,
@@ -127,7 +127,6 @@ class PublicSessionCalendar extends Component
             ),
             'total' => $monthSessions->count(),
             'todayDate' => DateHelper::today()->toDateString(),
-
             'monthLabel' => DateHelper::formatMonthYear($month),
             'monthOptions' => $this->monthOptions($month),
             'yearOptions' => range($this->earliestMonth()->year, $this->latestMonth()->year),

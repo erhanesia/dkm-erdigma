@@ -5,6 +5,7 @@ namespace Tests\Feature\Livewire;
 use App\Enums\SessionStatus;
 use App\Livewire\PublicSessionCalendar;
 use App\Models\AfterHoursSession;
+use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
@@ -48,6 +49,59 @@ class PublicSessionCalendarTest extends TestCase
         Livewire::test(PublicSessionCalendar::class)
             ->assertSee('Kajian Tafsir Al-Kahfi')
             ->assertSeeHtml(e(route('portal.sessions.show', ['session' => $session->id])));
+    }
+
+    public function test_each_calendar_card_shows_the_time_speaker_and_place(): void
+    {
+        AfterHoursSession::factory()
+            ->for(User::factory()->state(['name' => 'Ustadz Abdullah']), 'mentor')
+            ->create([
+                'topic' => 'Kajian Tafsir Al-Kahfi',
+                'starts_at' => '2026-09-15 16:30:00',
+                'ends_at' => '2026-09-15 18:00:00',
+                'location' => 'Aula Lantai 3',
+            ]);
+
+        Livewire::test(PublicSessionCalendar::class)
+            ->assertSeeInOrder(['16:30–18:00', 'Kajian Tafsir Al-Kahfi', 'Ustadz Abdullah', 'Aula Lantai 3']);
+    }
+
+    public function test_each_day_with_sessions_says_how_many_it_holds(): void
+    {
+        AfterHoursSession::factory()
+            ->count(4)
+            ->sequence(
+                ['starts_at' => '2026-09-16 09:00:00', 'ends_at' => '2026-09-16 10:00:00'],
+                ['starts_at' => '2026-09-16 11:00:00', 'ends_at' => '2026-09-16 12:00:00'],
+                ['starts_at' => '2026-09-16 13:00:00', 'ends_at' => '2026-09-16 14:00:00'],
+                ['starts_at' => '2026-09-16 16:30:00', 'ends_at' => '2026-09-16 18:00:00'],
+            )
+            ->create();
+        AfterHoursSession::factory()->create([
+            'starts_at' => '2026-09-17 16:30:00',
+            'ends_at' => '2026-09-17 18:00:00',
+        ]);
+
+        Livewire::test(PublicSessionCalendar::class)
+            ->assertSeeHtml('<span class="landing-calendar-daycount"><strong>4</strong> kegiatan</span>')
+            ->assertSeeHtml('<span class="landing-calendar-daycount"><strong>1</strong> kegiatan</span>');
+    }
+
+    public function test_a_moved_session_is_flagged_on_its_calendar_card(): void
+    {
+        AfterHoursSession::factory()->create([
+            'starts_at' => '2026-09-17 19:00:00',
+            'ends_at' => '2026-09-17 20:30:00',
+            'rescheduled_from' => '2026-09-15 16:30:00',
+        ]);
+
+        Livewire::test(PublicSessionCalendar::class)->assertSee('Dijadwal ulang');
+    }
+
+    public function test_a_month_without_public_sessions_says_so(): void
+    {
+        Livewire::test(PublicSessionCalendar::class)
+            ->assertSee('Belum ada kegiatan yang diumumkan untuk September 2026.');
     }
 
     public function test_private_and_cancelled_sessions_are_left_off(): void

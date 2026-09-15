@@ -2,10 +2,12 @@
 @use('App\Support\Helpers\DateHelper')
 
 {{--
-    The month picker, the calendar and the month's agenda — nothing else.
+    The month picker and the calendar — nothing else.
 
-    Everything above this on the page is about After Hours in general, not the
-    month being read, so it stays put while the visitor browses.
+    The calendar is the one place a visitor reads the month: each session sits
+    on its day as a card that says when, what, who and where. There used to be
+    an agenda underneath repeating the same sessions, which left the visitor
+    wondering which of the two to trust.
 --}}
 <div>
     {{-- The same toolbar as the prayer and Friday pages: which month on the
@@ -101,14 +103,26 @@
 
     {{--
         Dimmed rather than emptied while the next month arrives, so the page keeps
-        its height. The keys carry the month, so the new calendar and agenda are
-        new elements and play their entrance instead of being rewritten in place.
+        its height. The key carries the month, so the new calendar is a new
+        element and plays its entrance instead of being rewritten in place.
     --}}
     <div wire:loading.class="is-fetching"
          wire:target="selectMonth, selectYear, previousMonth, nextMonth, resetMonth"
          class="landing-calendar-swap">
 
         <div class="landing-calendar" wire:key="calendar-{{ $this->month }}" data-aos>
+            {{-- What the month holds, and what the two card colours mean. --}}
+            <div class="landing-calendar-bar">
+                <span class="landing-calendar-count">
+                    <strong>{{ $total }}</strong> kegiatan di {{ $monthLabel }}
+                </span>
+
+                <span class="landing-calendar-legend">
+                    <span><i class="landing-calendar-key"></i> Akan datang</span>
+                    <span><i class="landing-calendar-key is-completed"></i> Sudah berlangsung</span>
+                </span>
+            </div>
+
             <div class="landing-calendar-head" aria-hidden="true">
                 @foreach ($weekdayLabels as $label)
                     <div>{{ $label }}</div>
@@ -120,76 +134,80 @@
                     @foreach ($week as $day)
                         @php
                             $date = $day->toDateString();
-                            $daySessions = $day->month === $monthDate->month ? $sessionsByDate->get($date, collect()) : collect();
+                            $isOutside = $day->month !== $monthDate->month;
+                            $daySessions = $isOutside ? collect() : $sessionsByDate->get($date, collect());
                         @endphp
 
                         <div @class([
                             'landing-calendar-day',
-                            'is-outside' => $day->month !== $monthDate->month,
+                            'is-outside' => $isOutside,
                             'is-today' => $date === $todayDate,
+                            'has-sessions' => $daySessions->isNotEmpty(),
                         ])>
-                            <span class="landing-calendar-date">{{ $day->day }}</span>
+                            {{-- The weekday is only shown once the grid becomes a list:
+                                 in the grid the column heading already says it. --}}
+                            <div class="landing-calendar-dayhead">
+                                <span class="landing-calendar-weekday">{{ mb_substr(DateHelper::dayName($day), 0, 3) }}</span>
+                                <span class="landing-calendar-date">{{ $day->day }}</span>
 
-                            @foreach ($daySessions as $session)
-                                <a href="{{ route('portal.sessions.show', ['session' => $session->id]) }}"
-                                   @class([
-                                       'landing-calendar-event',
-                                       'is-completed' => $session->status === SessionStatus::Completed,
-                                   ])
-                                   title="{{ $session->starts_at->format('H:i') }} · {{ $session->topic }}">
-                                    <span class="landing-calendar-event-time">{{ $session->starts_at->format('H:i') }}</span>
-                                    <span class="landing-calendar-event-title">{{ $session->topic }}</span>
-                                </a>
-                            @endforeach
+                                {{-- How many sessions the day holds. A pill with the word
+                                     beside the number, so it never reads as a second date —
+                                     and on a busy day it says there is more to scroll to. --}}
+                                @if ($daySessions->isNotEmpty())
+                                    <span class="landing-calendar-daycount"><strong>{{ $daySessions->count() }}</strong> kegiatan</span>
+                                @endif
+                            </div>
+
+                            @if ($daySessions->isNotEmpty())
+                                <div class="landing-calendar-events">
+                                    @foreach ($daySessions as $session)
+                                        <a href="{{ route('portal.sessions.show', ['session' => $session->id]) }}"
+                                           wire:key="event-{{ $session->id }}"
+                                           @class([
+                                               'landing-calendar-event',
+                                               'is-completed' => $session->status === SessionStatus::Completed,
+                                           ])
+                                           title="{{ $session->topic }}">
+                                            <span class="landing-calendar-event-time">
+                                                {{ $session->starts_at->format('H:i') }}–{{ $session->ends_at->format('H:i') }}
+                                            </span>
+
+                                            <span class="landing-calendar-event-title">{{ $session->topic }}</span>
+
+                                            @if ($session->mentor)
+                                                <span class="landing-calendar-event-meta">
+                                                    <i class="bi bi-person-badge"></i>
+                                                    <span>{{ $session->mentor->name }}</span>
+                                                </span>
+                                            @endif
+
+                                            @if ($session->location)
+                                                <span class="landing-calendar-event-meta">
+                                                    <i class="bi bi-geo-alt"></i>
+                                                    <span>{{ $session->location }}</span>
+                                                </span>
+                                            @endif
+
+                                            @if ($session->isRescheduled())
+                                                <span class="landing-calendar-event-flag">
+                                                    <i class="bi bi-arrow-repeat"></i> Dijadwal ulang
+                                                </span>
+                                            @endif
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 @endforeach
             </div>
-        </div>
 
-        {{-- The same month as a list: on a phone the calendar shows only dots,
-             so this is where the sessions are actually read. --}}
-        <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-4"
-             wire:key="agenda-head-{{ $this->month }}" data-aos>
-            <h2 class="landing-heading h4 mb-0">Agenda {{ $monthLabel }}</h2>
-            <span class="landing-sub mb-0">{{ $total }} kegiatan</span>
-        </div>
-
-        @if ($total === 0)
-            <div class="landing-empty" wire:key="empty-{{ $this->month }}" data-aos>
-                <i class="bi bi-calendar-x"></i>
-                <p class="mb-0">Belum ada kegiatan yang diumumkan untuk {{ $monthLabel }}.</p>
-            </div>
-        @else
-            @foreach ($sessionsByDate as $date => $daySessions)
-                @php($day = DateHelper::toCarbon($date))
-
-                <div class="landing-day-group"
-                     wire:key="day-{{ $date }}"
-                     data-aos
-                     data-aos-delay="{{ min(($loop->index + 1) * 60, 300) }}">
-
-                    <div class="landing-day-head">
-                        <span class="landing-day-badge">
-                            <span class="landing-day-num">{{ $day->format('d') }}</span>
-                            <span class="landing-day-mon">{{ DateHelper::shortMonthName((int) $day->format('n')) }}</span>
-                        </span>
-
-                        <div class="min-w-0">
-                            <div class="landing-day-name">{{ DateHelper::dayName($day) }}</div>
-                            <div class="landing-day-full">{{ DateHelper::formatLongDate($day) }}</div>
-                        </div>
-
-                        <span class="landing-day-count">{{ $daySessions->count() }} kegiatan</span>
-                    </div>
-
-                    <div class="landing-day-body">
-                        @foreach ($daySessions as $session)
-                            @include('partials.portal.session-card', ['session' => $session])
-                        @endforeach
-                    </div>
+            @if ($total === 0)
+                <div class="landing-calendar-empty">
+                    <i class="bi bi-calendar-x"></i>
+                    Belum ada kegiatan yang diumumkan untuk {{ $monthLabel }}.
                 </div>
-            @endforeach
-        @endif
+            @endif
+        </div>
     </div>
 </div>
