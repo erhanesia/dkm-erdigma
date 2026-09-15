@@ -134,8 +134,10 @@
                     @foreach ($week as $day)
                         @php
                             $date = $day->toDateString();
+                            // dd($date);
                             $isOutside = $day->month !== $monthDate->month;
                             $daySessions = $isOutside ? collect() : $sessionsByDate->get($date, collect());
+                            // dd($sessionsByDate->get('2026-09-14', collect()));
                         @endphp
 
                         <div @class([
@@ -172,14 +174,14 @@
                                                 {{ $session->starts_at->format('H:i') }}–{{ $session->ends_at->format('H:i') }}
                                             </span>
 
-                                            <span class="landing-calendar-event-title">{{ $session->topic }}</span>
+                                            <span class="landing-calendar-event-title">{{ $session->group->name }}</span>
 
-                                            @if ($session->mentor)
+                                            {{-- @if ($session->mentor)
                                                 <span class="landing-calendar-event-meta">
                                                     <i class="bi bi-person-badge"></i>
                                                     <span>{{ $session->mentor->name }}</span>
                                                 </span>
-                                            @endif
+                                            @endif --}}
 
                                             @if ($session->location)
                                                 <span class="landing-calendar-event-meta">
