@@ -38,11 +38,11 @@
 <body class="landing @yield('body-class')">
 
 {{--
-    The two schedule pages keep the month being read in `?bulan=`. Their links
+    The three schedule pages keep the month being read in `?bulan=`. Their links
     are marked `data-carry-month`, so `bindMonthCarry()` (navigation.js) copies
     that month onto them from the address bar as they are about to be followed.
 --}}
-@php($monthPages = ['portal.prayer-schedules', 'portal.friday-schedules'])
+@php($monthPages = ['portal.prayer-schedules', 'portal.friday-schedules', 'portal.sessions'])
 
 {{-- ---------------------------------------------------------------- Navbar --}}
 <nav class="landing-nav" data-landing-nav>
@@ -212,7 +212,7 @@
                     <li><a href="{{ route('portal.quran') }}">Al-Qur'an</a></li>
                     <li><a href="{{ route('portal.matsurat') }}">Al-Ma'tsurat</a></li>
                     <li><a href="{{ route('portal.friday-schedules') }}" data-carry-month>Khutbah Jumat</a></li>
-                    <li><a href="{{ route('portal.sessions') }}">After Hours</a></li>
+                    <li><a href="{{ route('portal.sessions') }}" data-carry-month>After Hours</a></li>
                 </ul>
             </div>
 

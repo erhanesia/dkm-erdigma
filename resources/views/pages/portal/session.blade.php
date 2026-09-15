@@ -10,10 +10,10 @@
     <x-portal-hero>
 
         <div class="container position-relative">
-            {{-- Trail back to the list. A detail page reached from a shared link
-                 has no history to go back through. --}}
-            <a href="{{ route('portal.sessions') }}" class="landing-back">
-                <i class="bi bi-arrow-left me-1"></i> Semua kegiatan
+            {{-- Trail back to the calendar, open on this session's month. A detail
+                 page reached from a shared link has no history to go back through. --}}
+            <a href="{{ route('portal.sessions', ['bulan' => $session->starts_at->format('Y-m')]) }}" class="landing-back">
+                <i class="bi bi-arrow-left me-1"></i> Kembali ke kalender
             </a>
 
             <span class="landing-eyebrow mt-3">
