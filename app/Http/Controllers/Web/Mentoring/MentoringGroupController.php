@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\MentoringGroup\StoreMentoringGroupRequest;
 use App\Models\MentoringGroup;
 use App\Models\User;
+use App\Services\AfterHours\AttendanceService;
 use App\Services\AfterHours\LocationService;
 use App\Services\AfterHours\MentoringGroupService;
 use App\Services\User\UserService;
@@ -28,6 +29,7 @@ class MentoringGroupController extends Controller
         private readonly MentoringGroupService $groups,
         private readonly UserService $users,
         private readonly LocationService $locations,
+        private readonly AttendanceService $attendances,
     ) {}
 
     public function index(Request $request): View
@@ -67,11 +69,18 @@ class MentoringGroupController extends Controller
 
         $mentoringGroup->load(['mentor', 'members']);
 
+        $groupIds = [$mentoringGroup->id];
+        $years = $this->attendances->yearOptions($this->attendances->firstRecordedYear(groupIds: $groupIds));
+        $year = $this->attendances->resolveYear($request->integer('tahun'), $years);
+
         return view('pages.mentoring-groups.show', [
             'group' => $mentoringGroup,
             'members' => $mentoringGroup->members,
             'remainingSlots' => $mentoringGroup->remainingSlots(),
             'sessions' => $mentoringGroup->sessions()->latest('starts_at')->limit(10)->get(),
+            'years' => $years,
+            'year' => $year,
+            'statistics' => $this->attendances->statistics($year, groupIds: $groupIds),
         ]);
     }
 

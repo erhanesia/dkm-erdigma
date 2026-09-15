@@ -174,6 +174,15 @@ class AfterHoursSession extends Model
         return ($moment ?? DateHelper::now())->greaterThan(DateHelper::toCarbon($this->starts_at));
     }
 
+    /**
+     * Whether its attendance says anything yet. Before it starts every member
+     * still carries the `absent` row seeded when it was scheduled.
+     */
+    public function hasStarted(?CarbonImmutable $moment = null): bool
+    {
+        return ($moment ?? DateHelper::now())->greaterThanOrEqualTo(DateHelper::toCarbon($this->starts_at));
+    }
+
     public function attendingCount(): int
     {
         return $this->attendances()->whereIn('status', AttendanceStatus::attendingValues())->count();

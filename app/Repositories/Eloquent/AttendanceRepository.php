@@ -6,6 +6,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Enums\AttendanceMethod;
 use App\Enums\AttendanceStatus;
+use App\Enums\SessionStatus;
 use App\Models\AfterHoursSession;
 use App\Models\Attendance;
 use App\Repositories\Contracts\AttendanceRepositoryInterface;
@@ -182,5 +183,55 @@ class AttendanceRepository extends BaseRepository implements AttendanceRepositor
             (int) ($row?->getAttribute('attended') ?? 0),
             (int) ($row?->getAttribute('total') ?? 0),
         );
+    }
+
+    public function statusCountsByMonth(int $year, ?int $userId = null, ?array $groupIds = null): array
+    {
+        $counts = array_fill(1, 12, array_fill_keys(AttendanceStatus::values(), 0));
+
+        $rows = $this->statisticsQuery($userId, $groupIds)
+            ->whereBetween('after_hours_sessions.starts_at', [sprintf('%d-01-01 00:00:00', $year), sprintf('%d-12-31 23:59:59', $year)])
+            ->selectRaw('MONTH(after_hours_sessions.starts_at) as month_number, attendances.status, COUNT(attendances.id) as total')
+            ->groupBy('month_number', 'attendances.status')
+            ->toBase()
+            ->get();
+
+        foreach ($rows as $row) {
+            $month = (int) $row->month_number;
+
+            if (isset($counts[$month][$row->status])) {
+                $counts[$month][$row->status] = (int) $row->total;
+            }
+        }
+
+        return $counts;
+    }
+
+    public function firstRecordedYear(?int $userId = null, ?array $groupIds = null): ?int
+    {
+        $first = $this->statisticsQuery($userId, $groupIds)->toBase()->min('after_hours_sessions.starts_at');
+
+        return $first === null ? null : (int) substr((string) $first, 0, 4);
+    }
+
+    /**
+     * Attendance that has actually happened.
+     *
+     * Every session seeds an `absent` row per member the moment it is
+     * scheduled, so an upcoming session would count as a room full of
+     * absences. A cancelled one never took place at all.
+     *
+     * @param  array<int, int>|null  $groupIds
+     * @return Builder<Attendance>
+     */
+    private function statisticsQuery(?int $userId, ?array $groupIds): Builder
+    {
+        return $this->query()
+            ->join('after_hours_sessions', 'after_hours_sessions.id', '=', 'attendances.after_hours_session_id')
+            ->whereNull('after_hours_sessions.deleted_at')
+            ->where('after_hours_sessions.status', '!=', SessionStatus::Cancelled->value)
+            ->where('after_hours_sessions.starts_at', '<=', DateHelper::now())
+            ->when($userId !== null, static fn (Builder $query) => $query->where('attendances.user_id', $userId))
+            ->when($groupIds !== null, static fn (Builder $query) => $query->whereIn('after_hours_sessions.mentoring_group_id', $groupIds));
     }
 }

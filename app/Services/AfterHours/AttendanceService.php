@@ -12,6 +12,7 @@ use App\Models\Attendance;
 use App\Models\User;
 use App\Repositories\Contracts\AttendanceRepositoryInterface;
 use App\Support\Helpers\DateHelper;
+use App\Support\Helpers\NumberHelper;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -144,6 +145,70 @@ class AttendanceService
         }
 
         return $tally;
+    }
+
+    /**
+     * One year of attendance, month by month, for the statistics charts.
+     *
+     * Only sessions that have started and were not cancelled count — see
+     * `AttendanceRepository::statisticsQuery()`.
+     *
+     * @param  array<int, int>|null  $groupIds
+     * @return array{months: array<int, array<string, int>>, totals: array<string, int>, recorded: int, attended: int, rate: float}
+     */
+    public function statistics(int $year, ?int $userId = null, ?array $groupIds = null): array
+    {
+        $months = $this->attendances->statusCountsByMonth($year, $userId, $groupIds);
+        $totals = array_fill_keys(AttendanceStatus::values(), 0);
+
+        foreach ($months as $counts) {
+            foreach ($counts as $status => $count) {
+                $totals[$status] += $count;
+            }
+        }
+
+        $recorded = array_sum($totals);
+        $attended = array_sum(array_intersect_key($totals, array_flip(AttendanceStatus::attendingValues())));
+
+        return [
+            'months' => $months,
+            'totals' => $totals,
+            'recorded' => $recorded,
+            'attended' => $attended,
+            'rate' => NumberHelper::percentageValue($attended, $recorded),
+        ];
+    }
+
+    /**
+     * @param  array<int, int>|null  $groupIds
+     */
+    public function firstRecordedYear(?int $userId = null, ?array $groupIds = null): ?int
+    {
+        return $this->attendances->firstRecordedYear($userId, $groupIds);
+    }
+
+    /**
+     * The years a statistics view can open on, newest first: from the first
+     * year with attendance up to this one.
+     *
+     * @return array<int, int>
+     */
+    public function yearOptions(?int $firstYear): array
+    {
+        $thisYear = DateHelper::today()->year;
+
+        return range($thisYear, min($firstYear ?? $thisYear, $thisYear));
+    }
+
+    /**
+     * The year asked for in `?tahun=`, or this year when it is not one of the
+     * options — a typed-in 1999 opens on the present rather than on nothing.
+     *
+     * @param  array<int, int>  $options
+     */
+    public function resolveYear(int $requested, array $options): int
+    {
+        return in_array($requested, $options, true) ? $requested : DateHelper::today()->year;
     }
 
     private function isExpectedAt(AfterHoursSession $session, User $user): bool

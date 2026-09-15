@@ -9,6 +9,37 @@
 
     $attending = ($tally[AttendanceStatus::Present->value] ?? 0) + ($tally[AttendanceStatus::Late->value] ?? 0);
     $expected = array_sum($tally);
+
+    /*
+     * The chart waits for the session to start: until then every member still
+     * carries the absent row seeded with it, and a ring of red would report
+     * absences that have not happened.
+     */
+    $isCancelled = $session->status === \App\Enums\SessionStatus::Cancelled;
+    $showsChart = $expected > 0 && ! $isCancelled && $session->hasStarted();
+    $rate = NumberHelper::percentageValue($attending, $expected);
+
+    // Five statuses and the total they add up to: six tiles, so the grid
+    // closes as even rows — three by two, or two by three on a phone.
+    $tallyTiles = [
+        ...array_map(static fn (AttendanceStatus $status): array => [
+            'label' => $status->label(),
+            'icon' => $status->icon(),
+            'color' => $status->color(),
+            'count' => $tally[$status->value] ?? 0,
+            'share' => $expected > 0 ? NumberHelper::percentageValue($tally[$status->value] ?? 0, $expected, 0) : null,
+        ], AttendanceStatus::cases()),
+        ['label' => 'Total', 'icon' => 'people', 'color' => 'secondary', 'count' => $expected, 'share' => null],
+    ];
+
+    $sharePayload = [
+        'labels' => array_map(static fn (AttendanceStatus $status): string => $status->label(), AttendanceStatus::cases()),
+        'datasets' => [[
+            'label' => 'Presensi',
+            'data' => array_map(static fn (AttendanceStatus $status): int => $tally[$status->value] ?? 0, AttendanceStatus::cases()),
+            'colors' => array_map(static fn (AttendanceStatus $status): string => $status->color(), AttendanceStatus::cases()),
+        ]],
+    ];
 @endphp
 
 @section('content')
@@ -127,25 +158,13 @@
                 </div>
             </div>
 
-            <div class="card" data-aos="fade-up" data-aos-delay="60">
-                <div class="card-body">
-                    <h2 class="card-title mb-3">Rekap Presensi</h2>
-
-                    @foreach (AttendanceStatus::cases() as $status)
-                        @php $count = $tally[$status->value] ?? 0; @endphp
-                        <div class="d-flex align-items-center gap-3 py-2 border-bottom">
-                            <i class="bi bi-{{ $status->icon() }} text-{{ $status->color() }}"></i>
-                            <span class="flex-grow-1" style="font-size:.875rem;">{{ $status->label() }}</span>
-                            <span class="fw-bold text-tabular">{{ $count }}</span>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
         </div>
 
         <div class="col-12 col-lg-8">
-            <div class="card h-100" data-aos="fade-up" data-aos-delay="120">
-                <div class="card-body pb-2">
+            <div class="card h-100" data-aos="fade-up" data-aos-delay="60">
+                {{-- `flex-grow-0`: in a card stretched to the row's height, the header
+                     would otherwise swallow the spare room and push the list down. --}}
+                <div class="card-body flex-grow-0 pb-3">
                     <div class="d-flex align-items-start justify-content-between">
                         <div>
                             <h2 class="card-title mb-0">Daftar Hadir</h2>
@@ -155,6 +174,61 @@
        wire:navigate class="btn btn-sm btn-light">
                             <i class="bi bi-pencil me-1"></i> Isi
                         </a>
+                    </div>
+                </div>
+
+                {{-- The roll call at a glance, right above the names it sums up: the
+                     share of each status in the ring, the counts beside it as a grid
+                     that closes on the total they add up to. --}}
+                <div class="px-4 py-4 border-top">
+                    <div class="row g-4 align-items-center">
+                        @unless ($isCancelled)
+                            <div class="col-12 col-md-auto d-flex justify-content-center">
+                                @if ($showsChart)
+                                    {{-- The rate sits in the ring's hole, laid over the canvas. --}}
+                                    <div class="position-relative" style="width:184px;height:184px;">
+                                        <canvas data-chart="doughnut" data-chart-payload='@json($sharePayload)'
+                                                role="img" aria-label="Komposisi status presensi kegiatan ini"></canvas>
+                                        <div class="position-absolute top-0 start-0 w-100 h-100 d-grid text-center"
+                                             style="place-items:center;pointer-events:none;">
+                                            <div>
+                                                <div class="fw-bold text-tabular lh-1" style="font-size:1.625rem;">{{ number_format($rate, 0, ',', '.') }}%</div>
+                                                <div class="text-secondary mt-1" style="font-size:.75rem;">kehadiran</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="d-grid rounded-circle text-center text-body-tertiary px-4"
+                                         style="width:184px;height:184px;place-items:center;font-size:.75rem;border:2px dashed var(--bs-border-color);">
+                                        <span><i class="bi bi-pie-chart d-block fs-4 mb-1"></i>Grafik muncul setelah kegiatan dimulai.</span>
+                                    </div>
+                                @endif
+                            </div>
+                        @endunless
+
+                        {{-- Three columns where the card has the width for them. From lg to
+                             xl the card shares its row with Rincian, so two columns of three
+                             rows sit beside the ring instead of squeezing the labels. --}}
+                        <div class="col">
+                            <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-2 row-cols-xxl-3 g-2">
+                                @foreach ($tallyTiles as $tile)
+                                    <div class="col">
+                                        <div class="h-100 rounded-3 border px-3 py-2" style="min-width:0;">
+                                            <div class="d-flex align-items-center gap-2 text-secondary" style="font-size:.75rem;">
+                                                <i class="bi bi-{{ $tile['icon'] }} text-{{ $tile['color'] }} flex-shrink-0"></i>
+                                                <span class="text-truncate">{{ $tile['label'] }}</span>
+                                            </div>
+                                            <div class="d-flex align-items-baseline gap-2">
+                                                <span class="fw-bold text-tabular" style="font-size:1.375rem;">{{ $tile['count'] }}</span>
+                                                @if ($tile['share'] !== null)
+                                                    <span class="text-body-tertiary text-tabular" style="font-size:.75rem;">{{ number_format($tile['share'], 0, ',', '.') }}%</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
 

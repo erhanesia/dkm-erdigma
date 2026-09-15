@@ -6,9 +6,11 @@
  */
 import {
     Chart,
+    ArcElement,
     BarController,
     BarElement,
     CategoryScale,
+    DoughnutController,
     Filler,
     Legend,
     LineController,
@@ -19,9 +21,11 @@ import {
 } from 'chart.js';
 
 Chart.register(
+    ArcElement,
     BarController,
     BarElement,
     CategoryScale,
+    DoughnutController,
     Filler,
     Legend,
     LineController,
@@ -31,11 +35,18 @@ Chart.register(
     Tooltip,
 );
 
+/*
+ * Keyed by the Bootstrap colour names the enums already use, so a payload can
+ * pass `AttendanceStatus::color()` straight through. `info` and `secondary`
+ * are there for Izin and Sakit, which would otherwise both fall back to green.
+ */
 const PALETTE = {
     primary: '#0f9670',
     success: '#16a34a',
     warning: '#d97706',
     danger: '#dc2626',
+    info: '#0284c7',
+    secondary: '#a8a29e',
     neutral: '#a8a29e',
 };
 
@@ -114,6 +125,35 @@ export function initCharts() {
         const type = canvas.dataset.chart;
 
         if (!payload.labels?.length) {
+            return;
+        }
+
+        // One ring of shares: every slice has its own colour and there are no
+        // axes, so none of the line and bar options below apply.
+        if (type === 'doughnut') {
+            instances.push(new Chart(canvas, {
+                type,
+                data: {
+                    labels: payload.labels,
+                    datasets: (payload.datasets ?? []).map((dataset) => ({
+                        ...dataset,
+                        backgroundColor: (dataset.colors ?? []).map((name) => PALETTE[name] ?? PALETTE.primary),
+                        borderColor: '#fff',
+                        borderWidth: 2,
+                        hoverOffset: 4,
+                    })),
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        tooltip: baseOptions.plugins.tooltip,
+                        legend: { display: payload.legend === true, position: 'bottom' },
+                    },
+                },
+            }));
+
             return;
         }
 

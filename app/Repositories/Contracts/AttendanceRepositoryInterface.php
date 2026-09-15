@@ -54,4 +54,20 @@ interface AttendanceRepositoryInterface extends RepositoryInterface
     public function monthlyTrend(int $months = 6, ?array $groupIds = null): array;
 
     public function attendanceRateInMonth(CarbonImmutable $month, ?array $groupIds = null): float;
+
+    /**
+     * Attendance entries per status for each month of one year — only for
+     * sessions that have started and were not cancelled.
+     *
+     * @param  array<int, int>|null  $groupIds
+     * @return array<int, array<string, int>> month number (1–12) => status value => count
+     */
+    public function statusCountsByMonth(int $year, ?int $userId = null, ?array $groupIds = null): array;
+
+    /**
+     * The year of the earliest session that counts toward those statistics.
+     *
+     * @param  array<int, int>|null  $groupIds
+     */
+    public function firstRecordedYear(?int $userId = null, ?array $groupIds = null): ?int;
 }

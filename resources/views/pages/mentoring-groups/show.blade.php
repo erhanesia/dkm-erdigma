@@ -47,6 +47,17 @@
         </div>
     </div>
 
+    {{-- The summary first, like every other statistics page: the lists below
+         are where to look once the chart has raised a question. --}}
+    <div class="mb-3">
+        @include('partials.attendance-statistics', [
+            'title' => 'Statistik Kehadiran',
+            'subtitle' => 'Status kehadiran anggota di setiap bulan, tahun ' . $year,
+            'emptyText' => 'Grafik terisi setelah kegiatan halaqah ini berjalan dan presensinya dicatat.',
+            'anchor' => 'statistik',
+        ])
+    </div>
+
     <div class="row g-3">
         <div class="col-12 col-lg-5">
             <div class="card h-100" data-aos="fade-up">

@@ -16,6 +16,20 @@
             icon="people"
             title="Anda belum tergabung di halaqah mana pun"
             text="Pengurus DKM atau ustadz pembina yang mendaftarkan anggota ke halaqah. Hubungi mereka untuk bergabung." />
+
+        {{-- A mentor who leads a halaqah without being a member of one still
+             has its attendance to follow. --}}
+        @if ($mentoredStatistics !== null)
+            <div class="mt-4">
+                @include('partials.attendance-statistics', [
+                    'statistics' => $mentoredStatistics,
+                    'title' => 'Halaqah yang Saya Bina',
+                    'subtitle' => 'Status kehadiran anggota halaqah binaan Anda per bulan, tahun ' . $year,
+                    'emptyText' => 'Grafik terisi setelah kegiatan halaqah binaan Anda berjalan dan presensinya dicatat.',
+                    'anchor' => 'statistik-binaan',
+                ])
+            </div>
+        @endif
     @else
         <div class="row g-3 mb-4">
             {{-- ------------------------------------------------ Halaqah --}}
@@ -107,6 +121,32 @@
                 </div>
             </div>
         </div>
+
+        {{-- ------------------------------------------ Statistik kehadiran --}}
+        {{-- One year filter for both cards: they are read side by side, so they
+             always show the same year. --}}
+        <div class="mb-4">
+            @include('partials.attendance-statistics', [
+                'statistics' => $personalStatistics,
+                'title' => 'Kehadiran Saya',
+                'subtitle' => 'Status kehadiran Anda di setiap bulan, tahun ' . $year,
+                'emptyText' => 'Grafik terisi setelah Anda mengikuti kegiatan dan presensinya dicatat.',
+                'anchor' => 'statistik',
+            ])
+        </div>
+
+        @if ($mentoredStatistics !== null)
+            <div class="mb-4">
+                @include('partials.attendance-statistics', [
+                    'statistics' => $mentoredStatistics,
+                    'title' => 'Halaqah yang Saya Bina',
+                    'subtitle' => 'Status kehadiran anggota halaqah binaan Anda per bulan, tahun ' . $year,
+                    'emptyText' => 'Grafik terisi setelah kegiatan halaqah binaan Anda berjalan dan presensinya dicatat.',
+                    'anchor' => 'statistik-binaan',
+                    'filter' => false,
+                ])
+            </div>
+        @endif
 
         {{-- ------------------------------------------ Riwayat kehadiran --}}
         <div class="card" data-aos data-aos-delay="120">
